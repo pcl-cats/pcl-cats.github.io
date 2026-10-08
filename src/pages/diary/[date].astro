@@ -1,0 +1,29 @@
+---
+import { getCollection, render } from 'astro:content';
+import SiteLayout from '../../layouts/SiteLayout.astro';
+import { catUrl, formatDate } from '../../lib/content';
+import type { Diary } from '../../lib/content';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('diary');
+  return entries.map((entry) => ({ params: { date: entry.data.date }, props: { entry } }));
+}
+
+const { entry } = Astro.props as { entry: Diary };
+const { Content } = await render(entry);
+const cats = await getCollection('cats');
+const related = (entry.data.cats ?? []).map((id) => cats.find((cat) => cat.id === id)).filter((cat) => cat !== undefined);
+const entries = (await getCollection('diary')).sort((a, b) => a.data.date.localeCompare(b.data.date));
+const position = entries.findIndex((item) => item.id === entry.id);
+const previous = entries[position - 1];
+const next = entries[position + 1];
+---
+
+<SiteLayout title={entry.data.title} description={`${formatDate(entry.data.date)}：${entry.data.title}。`}>
+  <div class="container breadcrumb"><a href="/diary/">园区日记</a><span>/</span><time datetime={entry.data.date}>{entry.data.date}</time></div>
+  <article class="entry-page container">
+    <header class="entry-header"><p class="eyebrow">FIELD NOTE / {entry.data.date.replaceAll('-', '.')}</p><h1>{entry.data.title}</h1><div class="entry-meta"><time datetime={entry.data.date}>{formatDate(entry.data.date)}</time>{entry.data.milestone && <a href="/timeline/" class="milestone-label">大事记</a>}</div></header>
+    <div class="entry-layout"><div class="entry-body prose"><Content /></div><aside class="entry-side"><div class="side-card"><span class="micro-label">THIS DAY</span><strong>{entry.data.date.slice(5).replace('-', ' / ')}</strong><span>{entry.data.date.slice(0, 4)}</span></div>{related.length > 0 && <div class="side-related"><h2>这一天出现的猫</h2>{related.map((cat) => cat && <a href={catUrl(cat.id)}><img src={cat.data.photo} alt="" width="48" height="48" loading="lazy" /><span>{cat.data.name}</span><span aria-hidden="true">↗</span></a>)}</div>}</aside></div>
+  </article>
+  <nav class="entry-pagination container" aria-label="相邻日记">{previous ? <a href={`/diary/${previous.data.date}/`}><span>← 上一篇</span><strong>{previous.data.title}</strong></a> : <span></span>}{next ? <a href={`/diary/${next.data.date}/`}><span>下一篇 →</span><strong>{next.data.title}</strong></a> : <span></span>}</nav>
+</SiteLayout>

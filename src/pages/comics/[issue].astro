@@ -1,0 +1,14 @@
+---
+import { getCollection, render } from 'astro:content';
+import SiteLayout from '../../layouts/SiteLayout.astro';
+import type { CollectionEntry } from 'astro:content';
+
+export async function getStaticPaths() {
+  const comics = await getCollection('comics');
+  return comics.map((comic) => ({ params: { issue: String(comic.data.issue).padStart(2, '0') }, props: { comic } }));
+}
+const { comic } = Astro.props as { comic: CollectionEntry<'comics'> };
+const { Content } = await render(comic);
+---
+
+<SiteLayout title={comic.data.title}><div class="container breadcrumb"><a href="/comics/">猫猫漫画</a><span>/</span><span>{comic.data.title}</span></div><section class="container comic-detail"><p class="eyebrow">CAT COMICS / ISSUE {String(comic.data.issue).padStart(2, '0')}</p><h1>{comic.data.title}</h1><p>出场猫咪：{comic.data.cast}</p><div class="comic-pages prose"><Content /></div><div class="back-row"><a href="/comics/">← 返回全部漫画</a></div></section></SiteLayout>

@@ -1,0 +1,58 @@
+---
+import { getCollection } from 'astro:content';
+import SiteLayout from '../../layouts/SiteLayout.astro';
+import DiaryCard from '../../components/DiaryCard.astro';
+
+const entries = (await getCollection('diary')).sort((a, b) => b.data.date.localeCompare(a.data.date));
+const cats = (await getCollection('cats')).sort((a, b) => a.data.name.localeCompare(b.data.name, 'zh-CN'));
+const catNames = new Map(cats.map((cat) => [cat.id, cat.data.name]));
+const months = new Map<string, typeof entries>();
+for (const entry of entries) {
+  const month = entry.data.date.slice(0, 7);
+  if (!months.has(month)) months.set(month, []);
+  months.get(month)?.push(entry);
+}
+---
+
+<SiteLayout title="园区日记" description="按日期翻阅 PCL 猫猫的日常照护、救助和领养记录。">
+  <section class="page-intro container">
+    <p class="eyebrow">FIELD NOTES / 园区日记</p>
+    <h1>每一天的小事，<br /><span>都有猫在场。</span></h1>
+    <p>这里记录喂养、绝育、就医与领养，也留下那些让人会心一笑的瞬间。按时间翻阅，或找一只猫的故事。</p>
+  </section>
+  <section class="container diary-archive" aria-label="日记列表">
+    <div class="archive-toolbar">
+      <label class="search-field"><span class="sr-only">搜索日记</span><span aria-hidden="true">⌕</span><input id="diary-search" type="search" placeholder="搜索日记内容" autocomplete="off" /></label>
+      <label class="select-field"><span class="sr-only">按猫咪筛选日记</span><select id="diary-cat"><option value="">全部猫咪</option>{cats.map((cat) => <option value={cat.id}>{cat.data.name}</option>)}</select><span aria-hidden="true">⌄</span></label>
+      <p id="diary-result" aria-live="polite">共 {entries.length} 篇日记</p>
+    </div>
+    {[...months].map(([month, monthEntries]) => <section class="month-section" data-month-section><div class="month-heading"><h2>{month.replace('-', ' 年 ')} 月</h2><span>{monthEntries.length} 篇记录</span></div><div class="diary-grid archive-grid">{monthEntries.map((entry) => <div class="archive-item" data-cats={(entry.data.cats ?? []).join(' ')} data-search={`${entry.data.title} ${entry.body ?? ''} ${(entry.data.cats ?? []).map((id) => catNames.get(id) ?? '').join(' ')}`.toLowerCase()}><DiaryCard entry={entry} /></div>)}</div></section>)}
+    <p class="empty-state" id="diary-empty" hidden>没有找到相关日记，试试其他关键词或猫咪。</p>
+  </section>
+  <script>
+    const search = document.querySelector<HTMLInputElement>('#diary-search');
+    const select = document.querySelector<HTMLSelectElement>('#diary-cat');
+    const items = [...document.querySelectorAll<HTMLElement>('.archive-item')];
+    const months = [...document.querySelectorAll<HTMLElement>('[data-month-section]')];
+    const result = document.querySelector<HTMLElement>('#diary-result');
+    const empty = document.querySelector<HTMLElement>('#diary-empty');
+    const requestedCat = new URLSearchParams(window.location.search).get('cat');
+    if (requestedCat && [...(select?.options ?? [])].some((option) => option.value === requestedCat) && select) select.value = requestedCat;
+    const update = () => {
+      const query = search?.value.trim().toLowerCase() ?? '';
+      const cat = select?.value ?? '';
+      let count = 0;
+      for (const item of items) {
+        const show = (!cat || (item.dataset.cats ?? '').split(' ').includes(cat)) && (item.dataset.search ?? '').includes(query);
+        item.hidden = !show;
+        if (show) count++;
+      }
+      months.forEach((month) => { month.hidden = !month.querySelector('.archive-item:not([hidden])'); });
+      if (result) result.textContent = `找到 ${count} 篇日记`;
+      if (empty) empty.hidden = count !== 0;
+    };
+    search?.addEventListener('input', update);
+    select?.addEventListener('change', update);
+    update();
+  </script>
+</SiteLayout>

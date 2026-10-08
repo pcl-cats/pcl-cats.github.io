@@ -1,0 +1,14 @@
+{
+  "name": "pcl-cats.github.io",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check:content": "python3 scripts/check_content.py"
+  },
+  "type": "module",
+  "dependencies": {
+    "astro": "^7.3.7"
+  }
+}

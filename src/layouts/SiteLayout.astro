@@ -1,0 +1,66 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = 'PCL 猫猫图鉴',
+  description = '认识园区里的猫，读它们的故事，也看见照顾它们的日常。',
+} = Astro.props;
+const path = Astro.url.pathname;
+const nav = [
+  { href: '/cats/', label: '猫猫图鉴' },
+  { href: '/diary/', label: '日记' },
+  { href: '/timeline/', label: '大事记' },
+  { href: '/about/', label: '关于我们' },
+];
+---
+
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#183a31" />
+    <meta name="description" content={description} />
+    <title>{title === 'PCL 猫猫图鉴' ? title : `${title} · PCL 猫猫图鉴`}</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">跳到正文</a>
+    <header class="site-header">
+      <div class="header-inner container">
+        <a class="brand" href="/" aria-label="PCL 猫猫图鉴首页">
+          <span class="brand-symbol" aria-hidden="true">✳</span>
+          <span class="brand-text"><strong>PCL</strong><small>猫猫图鉴</small></span>
+        </a>
+        <nav class="main-nav" aria-label="主导航">
+          {nav.map((item) => (
+            <a href={item.href} aria-current={path.startsWith(item.href) ? 'page' : undefined}>{item.label}</a>
+          ))}
+        </nav>
+        <a class="header-note" href="/guide/">与猫相处 <span aria-hidden="true">↗</span></a>
+      </div>
+    </header>
+    <main id="main"><slot /></main>
+    <footer class="site-footer">
+      <div class="container footer-inner">
+        <div>
+          <a class="footer-brand" href="/">PCL<span> / </span>CATS</a>
+          <p>记下每一只猫的名字，也记下和它们有关的日常。</p>
+        </div>
+        <div class="footer-links">
+          <a href="/cats/">猫猫图鉴</a>
+          <a href="/diary/">日记</a>
+          <a href="/timeline/">大事记</a>
+          <a href="/about/">关于我们</a>
+          <a href="/guide/">与猫相处</a>
+        </div>
+        <p class="footer-meta">资料整理至 2026.10.07<br />愿每一次相遇都温柔。</p>
+      </div>
+    </footer>
+  </body>
+</html>

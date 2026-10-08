@@ -1,0 +1,22 @@
+---
+import type { Cat } from '../lib/content';
+import { catUrl } from '../lib/content';
+
+interface Props { cat: Cat; index?: number }
+const { cat, index } = Astro.props;
+---
+
+<a class="cat-card" href={catUrl(cat.id)}>
+  <div class="cat-card-photo">
+    <img src={cat.data.photo} alt={cat.data.name} loading="lazy" width="600" height="720" />
+    <span class:list={['status-pill', cat.data.status === '已领养' && 'is-adopted', cat.data.status === '失踪' && 'is-missing']}>{cat.data.status}</span>
+  </div>
+  <div class="cat-card-info">
+    <div>
+      <span class="micro-label">{index !== undefined ? String(index + 1).padStart(2, '0') : 'PCL CAT'}</span>
+      <h3>{cat.data.name}</h3>
+      <p>{cat.data.appearance ?? '一只特别的小猫'}</p>
+    </div>
+    <span class="card-arrow" aria-hidden="true">↗</span>
+  </div>
+</a>

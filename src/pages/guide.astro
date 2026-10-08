@@ -1,0 +1,10 @@
+---
+import { getEntry, render } from 'astro:content';
+import SiteLayout from '../layouts/SiteLayout.astro';
+
+const guide = await getEntry('pages', 'guide');
+if (!guide) throw new Error('缺少 content/guide.md');
+const { Content } = await render(guide);
+---
+
+<SiteLayout title="与猫相处" description="温柔、安全地与园区猫咪相处。"><section class="page-intro container"><p class="eyebrow">A GENTLE GUIDE / 与猫相处</p><h1>喜欢它们，<br /><span>也给它们空间。</span></h1><p>从观察开始，让每一次相遇对人和猫都更安心。</p></section><section class="container guide-layout"><div class="guide-mark" aria-hidden="true">✳<span>BE GENTLE</span></div><article class="guide-prose prose"><Content /></article></section><div class="container back-row"><a href="/cats/">去认识猫猫 ↗</a></div></SiteLayout>

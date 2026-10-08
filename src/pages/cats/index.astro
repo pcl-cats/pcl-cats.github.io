@@ -1,0 +1,62 @@
+---
+import { getCollection } from 'astro:content';
+import SiteLayout from '../../layouts/SiteLayout.astro';
+import CatCard from '../../components/CatCard.astro';
+
+const cats = await getCollection('cats');
+const order = ['huahua','aoliao','xuebing','xianbei','yunyun','wenwen','xiaobaoan','maomao','meimei','erbao','wusaqi','niandoubao','zhima','tangyuan','baidougong','lucky','dalian','jiangmituan','sangbiao','xiaoniu','xiaodouzi','rousong','xiongda','xionger','shuke','beita','xiaolaba','shatangju','natie','qiguiren','happy','jojo','chengc','cengceng','jintiao','shutiao','baitiao','latiao'];
+cats.sort((a, b) => order.indexOf(a.id) - order.indexOf(b.id));
+---
+
+<SiteLayout title="猫猫图鉴" description="认识 PCL 园区里的每一只猫，翻看它们的照片、性格和故事。">
+  <section class="page-intro container">
+    <p class="eyebrow">THE CATS / 猫猫图鉴</p>
+    <h1>认识这里的<br /><span>每一只猫。</span></h1>
+    <p>从老朋友到新面孔，试着按名字找到它们。档案状态来自已有记录，遇见猫咪时请以当下情况为准。</p>
+  </section>
+  <section class="container catalog-section" aria-label="全部猫咪">
+    <div class="catalog-toolbar">
+      <div class="filter-row" role="group" aria-label="按状态筛选">
+        <button class="filter-button active" type="button" data-status="all" aria-pressed="true">全部 <span>{cats.length}</span></button>
+        <button class="filter-button" type="button" data-status="园区活动" aria-pressed="false">园区活动</button>
+        <button class="filter-button" type="button" data-status="已领养" aria-pressed="false">已领养</button>
+        <button class="filter-button" type="button" data-status="失踪" aria-pressed="false">失踪</button>
+      </div>
+      <label class="search-field"><span class="sr-only">搜索猫咪名字或花色</span><span aria-hidden="true">⌕</span><input id="cat-search" type="search" placeholder="搜索名字或花色" autocomplete="off" /></label>
+    </div>
+    <p id="cat-result" class="result-note" aria-live="polite">共 {cats.length} 只猫猫</p>
+    <div class="cat-grid catalog-grid" id="cat-grid">
+      {cats.map((cat, index) => <div class="catalog-item" data-status={cat.data.status} data-search={`${cat.data.name} ${cat.data.appearance ?? ''}`.toLowerCase()}><CatCard cat={cat} index={index} /></div>)}
+    </div>
+    <p class="empty-state" id="cat-empty" hidden>没有找到符合条件的猫猫，试试别的名字或花色。</p>
+  </section>
+  <script>
+    const buttons = [...document.querySelectorAll<HTMLButtonElement>('.filter-button')];
+    const search = document.querySelector<HTMLInputElement>('#cat-search');
+    const items = [...document.querySelectorAll<HTMLElement>('.catalog-item')];
+    const result = document.querySelector<HTMLElement>('#cat-result');
+    const empty = document.querySelector<HTMLElement>('#cat-empty');
+    let status = 'all';
+    const update = () => {
+      const query = search?.value.trim().toLowerCase() ?? '';
+      let count = 0;
+      for (const item of items) {
+        const show = (status === 'all' || item.dataset.status === status) && (item.dataset.search ?? '').includes(query);
+        item.hidden = !show;
+        if (show) count++;
+      }
+      if (result) result.textContent = `找到 ${count} 只猫猫`;
+      if (empty) empty.hidden = count !== 0;
+    };
+    buttons.forEach((button) => button.addEventListener('click', () => {
+      status = button.dataset.status ?? 'all';
+      buttons.forEach((item) => {
+        const active = item === button;
+        item.classList.toggle('active', active);
+        item.setAttribute('aria-pressed', String(active));
+      });
+      update();
+    }));
+    search?.addEventListener('input', update);
+  </script>
+</SiteLayout>

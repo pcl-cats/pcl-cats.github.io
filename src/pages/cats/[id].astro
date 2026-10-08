@@ -1,0 +1,40 @@
+---
+import { getCollection, render } from 'astro:content';
+import SiteLayout from '../../layouts/SiteLayout.astro';
+import DiaryCard from '../../components/DiaryCard.astro';
+import { catUrl } from '../../lib/content';
+import type { Cat } from '../../lib/content';
+
+export async function getStaticPaths() {
+  const cats = await getCollection('cats');
+  return cats.map((cat) => ({ params: { id: cat.id }, props: { cat } }));
+}
+
+const { cat } = Astro.props as { cat: Cat };
+const { Content } = await render(cat);
+const allCats = await getCollection('cats');
+const relatives = (cat.data.relations ?? []).map((relation) => ({ ...relation, cat: allCats.find((item) => item.id === relation.cat) })).filter((item) => item.cat !== undefined);
+const diary = (await getCollection('diary')).filter((entry) => entry.data.cats?.includes(cat.id)).sort((a, b) => b.data.date.localeCompare(a.data.date));
+---
+
+<SiteLayout title={cat.data.name} description={`认识园区猫咪${cat.data.name}，看看它的档案和日记。`}>
+  <div class="container breadcrumb"><a href="/cats/">猫猫图鉴</a><span>/</span><span>{cat.data.name}</span></div>
+  <section class="cat-profile container">
+    <div class="profile-photo-wrap"><img class="profile-photo" src={cat.data.photo} alt={cat.data.name} width="800" height="950" /><span class="profile-photo-label">PCL CAT / {cat.data.name}</span></div>
+    <div class="profile-content">
+      <p class="eyebrow">MEET THE CAT <span>／</span> 猫咪档案</p>
+      <div class="profile-title-row"><h1>{cat.data.name}</h1><span class:list={['status-pill', cat.data.status === '已领养' && 'is-adopted', cat.data.status === '失踪' && 'is-missing']}>{cat.data.status}</span></div>
+      <div class="profile-story prose"><Content /></div>
+      <dl class="fact-grid">
+        {cat.data.appearance && <div><dt>花色 / 特征</dt><dd>{cat.data.appearance}</dd></div>}
+        {cat.data.birthMonth && <div><dt>档案生日</dt><dd>{cat.data.birthMonth}</dd></div>}
+        {cat.data.sex && <div><dt>性别</dt><dd>{cat.data.sex}</dd></div>}
+        {cat.data.sterilized !== undefined && <div><dt>绝育状态</dt><dd>{cat.data.sterilized ? '已绝育' : '暂未绝育'}</dd></div>}
+      </dl>
+      {relatives.length > 0 && <div class="profile-relations"><h2>认识它的伙伴</h2><div class="relation-list">{relatives.map((relation) => relation.cat && <a href={catUrl(relation.cat.id)}><img src={relation.cat.data.photo} alt="" loading="lazy" width="56" height="56" /><span><small>{relation.label}</small><strong>{relation.cat.data.name}</strong></span><span aria-hidden="true">↗</span></a>)}</div></div>}
+      <p class="profile-asof">档案据 2026 年 10 月 7 日前的记录整理，状态可能变化。</p>
+    </div>
+  </section>
+  {diary.length > 0 && <section class="section container" aria-labelledby="cat-diary-title"><div class="section-heading"><div><p class="eyebrow">FIELD NOTES</p><h2 id="cat-diary-title">{cat.data.name} 的日记</h2><p>与这只猫有关的照护和相遇。</p></div><a class="section-more" href={`/diary/?cat=${cat.id}`}>查看全部 {diary.length} 篇 <span aria-hidden="true">↗</span></a></div><div class="diary-grid">{diary.slice(0, 3).map((entry) => <DiaryCard entry={entry} variant="compact" />)}</div></section>}
+  <div class="container back-row"><a href="/cats/">← 返回猫猫图鉴</a></div>
+</SiteLayout>

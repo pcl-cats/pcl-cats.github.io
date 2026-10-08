@@ -1,0 +1,20 @@
+---
+import { getCollection, getEntry, render } from 'astro:content';
+import SiteLayout from '../layouts/SiteLayout.astro';
+
+const about = await getEntry('pages', 'about');
+if (!about) throw new Error('缺少 content/about.md');
+const { Content } = await render(about);
+const cats = await getCollection('cats');
+const diary = await getCollection('diary');
+const comics = (await getCollection('comics')).sort((a, b) => a.data.issue - b.data.issue);
+---
+
+<SiteLayout title="关于我们" description="了解 PCL 猫猫侠与园区猫咪图鉴。">
+  <section class="about-hero container"><div><p class="eyebrow light">ABOUT PCL CATS</p><h1>把相遇<br />好好记下来。</h1><p>一份从日常里长出来的园区猫咪记录。</p></div><div class="about-hero-photo"><img src="/images/cats/huahua.webp" alt="花花卧在路边" width="700" height="630" /><span>花花 / 园区老朋友</span></div></section>
+  <section class="container about-layout"><div class="about-lead"><p class="eyebrow">OUR STORY</p><h2>不只是一本图鉴，<br />也是一群猫的生活记录。</h2></div><div class="about-prose prose"><Content /></div></section>
+  <section class="about-numbers"><div class="container number-grid"><div><strong>{cats.length}</strong><span>只猫咪的档案</span></div><div><strong>{diary.length}</strong><span>篇按日期整理的日记</span></div><div><strong>{diary.filter((entry) => entry.data.milestone).length}</strong><span>个值得记住的时刻</span></div></div></section>
+  <section class="section container about-actions"><div class="section-heading"><div><p class="eyebrow">WHAT WE RECORD</p><h2>照顾从小事开始</h2></div></div><div class="action-grid"><div><span>01</span><h3>观察与记录</h3><p>认出每只猫，记下它们的性格和变化。</p></div><div><span>02</span><h3>照护与救助</h3><p>留下投喂、绝育、就医和救援的过程。</p></div><div><span>03</span><h3>尊重与领养</h3><p>给猫咪保留空间，也为有缘的相遇鼓掌。</p></div></div></section>
+  <section class="section container comic-preview"><div class="section-heading"><div><p class="eyebrow">A LITTLE EXTRA</p><h2>猫猫漫画</h2><p>文档里还有这些轻松的小故事。</p></div><a class="section-more" href="/comics/">查看全部漫画 <span aria-hidden="true">↗</span></a></div><div class="comic-grid">{comics.slice(0, 4).map((comic) => <a href={`/comics/${String(comic.data.issue).padStart(2, '0')}/`}><div><img src={comic.data.images[0]} alt={`${comic.data.title}漫画封面`} loading="lazy" width="400" height="520" /></div><strong>{comic.data.title}</strong><span>{comic.data.cast}</span></a>)}</div></section>
+  <section class="container guide-callout"><div><p class="eyebrow light">A GENTLE REMINDER</p><h2>靠近之前，先读读<br />与猫相处的小提示。</h2></div><a class="button button-light" href="/guide/">与猫相处 <span aria-hidden="true">↗</span></a></section>
+</SiteLayout>

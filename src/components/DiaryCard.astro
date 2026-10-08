@@ -1,0 +1,20 @@
+---
+import type { Diary } from '../lib/content';
+import { diaryUrl, excerpt, formatDate } from '../lib/content';
+
+interface Props { entry: Diary; variant?: 'default' | 'compact' }
+const { entry, variant = 'default' } = Astro.props;
+---
+
+<a class:list={['diary-card', variant === 'compact' && 'diary-card-compact', !entry.data.cover && 'is-text-only']} href={diaryUrl(entry.data.date)}>
+  {entry.data.cover && <div class="diary-card-photo"><img src={entry.data.cover} alt="" loading="lazy" width="640" height="480" /></div>}
+  <div class="diary-card-body">
+    <div class="diary-card-topline">
+      <time datetime={entry.data.date}>{formatDate(entry.data.date)}</time>
+      {entry.data.milestone && <span class="milestone-label">大事记</span>}
+    </div>
+    <h3>{entry.data.title}</h3>
+    <p>{excerpt(entry.body ?? '', variant === 'compact' ? 48 : 75)}</p>
+    <span class="text-link">读这一天 <span aria-hidden="true">↗</span></span>
+  </div>
+</a>
