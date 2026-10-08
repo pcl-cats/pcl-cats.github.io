@@ -27,22 +27,22 @@ const nav = [
     <meta name="theme-color" content="#183a31" />
     <meta name="description" content={description} />
     <title>{title === 'PCL 猫猫图鉴' ? title : `${title} · PCL 猫猫图鉴`}</title>
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/logo-pclcats.png" type="image/png" />
   </head>
   <body>
     <a class="skip-link" href="#main">跳到正文</a>
     <header class="site-header">
       <div class="header-inner container">
         <a class="brand" href="/" aria-label="PCL 猫猫图鉴首页">
-          <span class="brand-symbol" aria-hidden="true">✳</span>
-          <span class="brand-text"><strong>PCL</strong><small>猫猫图鉴</small></span>
+          <img class="brand-symbol" src="/logo-pclcats.png" alt="" width="48" height="48" />
+          <span class="brand-text">猫猫图鉴</span>
         </a>
         <nav class="main-nav" aria-label="主导航">
           {nav.map((item) => (
             <a href={item.href} aria-current={path.startsWith(item.href) ? 'page' : undefined}>{item.label}</a>
           ))}
         </nav>
-        <a class="header-note" href="/guide/">与猫相处 <span aria-hidden="true">↗</span></a>
+        <a class="header-note" href="/guide/">与猫相处 <span class="icon icon-arrow-up-right" aria-hidden="true"></span></a>
       </div>
     </header>
     <main id="main"><slot /></main>

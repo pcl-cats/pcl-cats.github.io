@@ -15,6 +15,6 @@ const { entry, variant = 'default' } = Astro.props;
     </div>
     <h3>{entry.data.title}</h3>
     <p>{excerpt(entry.body ?? '', variant === 'compact' ? 48 : 75)}</p>
-    <span class="text-link">读这一天 <span aria-hidden="true">↗</span></span>
+    <span class="text-link">读这一天 <span class="icon icon-arrow-up-right" aria-hidden="true"></span></span>
   </div>
 </a>

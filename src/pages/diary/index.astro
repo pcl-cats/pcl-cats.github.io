@@ -22,8 +22,8 @@ for (const entry of entries) {
   </section>
   <section class="container diary-archive" aria-label="日记列表">
     <div class="archive-toolbar">
-      <label class="search-field"><span class="sr-only">搜索日记</span><span aria-hidden="true">⌕</span><input id="diary-search" type="search" placeholder="搜索日记内容" autocomplete="off" /></label>
-      <label class="select-field"><span class="sr-only">按猫咪筛选日记</span><select id="diary-cat"><option value="">全部猫咪</option>{cats.map((cat) => <option value={cat.id}>{cat.data.name}</option>)}</select><span aria-hidden="true">⌄</span></label>
+      <label class="search-field"><span class="sr-only">搜索日记</span><span class="icon icon-search" aria-hidden="true"></span><input id="diary-search" type="search" placeholder="搜索日记内容" autocomplete="off" /></label>
+      <label class="select-field"><span class="sr-only">按猫咪筛选日记</span><select id="diary-cat"><option value="">全部猫咪</option>{cats.map((cat) => <option value={cat.id}>{cat.data.name}</option>)}</select><span class="icon icon-chevron-down" aria-hidden="true"></span></label>
       <p id="diary-result" aria-live="polite">共 {entries.length} 篇日记</p>
     </div>
     {[...months].map(([month, monthEntries]) => <section class="month-section" data-month-section><div class="month-heading"><h2>{month.replace('-', ' 年 ')} 月</h2><span>{monthEntries.length} 篇记录</span></div><div class="diary-grid archive-grid">{monthEntries.map((entry) => <div class="archive-item" data-cats={(entry.data.cats ?? []).join(' ')} data-search={`${entry.data.title} ${entry.body ?? ''} ${(entry.data.cats ?? []).map((id) => catNames.get(id) ?? '').join(' ')}`.toLowerCase()}><DiaryCard entry={entry} /></div>)}</div></section>)}

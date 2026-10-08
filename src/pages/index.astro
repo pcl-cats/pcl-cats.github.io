@@ -17,22 +17,22 @@ const milestones = diary.filter((entry) => entry.data.milestone).slice(0, 3);
       <h1>这里的每只猫，<br /><em>都有自己的名字。</em></h1>
       <p class="hero-intro">从快递站到四栋平台，认识那些常常与你擦肩而过的小家伙，也看看属于它们的日常。</p>
       <div class="hero-actions">
-        <a class="button button-light" href="/cats/">去认识猫猫 <span aria-hidden="true">↗</span></a>
-        <a class="hero-link" href="/diary/">翻开照护日记 <span aria-hidden="true">→</span></a>
+        <a class="button button-light" href="/cats/">去认识猫猫 <span class="icon icon-arrow-up-right" aria-hidden="true"></span></a>
+        <a class="hero-link" href="/diary/">翻开照护日记 <span class="icon icon-arrow-right" aria-hidden="true"></span></a>
       </div>
       <div class="hero-footnote"><strong>{cats.length}</strong><span>份猫咪档案<br />还在继续更新</span></div>
     </div>
     <div class="hero-photos" aria-label="园区猫咪照片">
       <div class="hero-photo hero-photo-main"><img src="/images/cats/xionger.webp" alt="熊二坐在园区里" width="700" height="840" /><span>熊二 <small>／ 四栋平台</small></span></div>
       <div class="hero-photo hero-photo-side"><img src="/images/cats/huahua.webp" alt="花花卧在路边" width="450" height="520" /><span>花花</span></div>
-      <div class="hero-stamp">认真记录<br />自由生长 <i>✳</i></div>
+      <div class="hero-stamp">认真记录<br />自由生长 <span class="hero-stamp-icon icon icon-sparkle" aria-hidden="true"></span></div>
     </div>
   </section>
 
   <section class="section container" aria-labelledby="cats-title">
     <div class="section-heading">
       <div><p class="eyebrow">01 / THE CATS</p><h2 id="cats-title">先认识几位老朋友</h2><p>每只猫都有自己的脾气和故事。</p></div>
-      <a class="section-more" href="/cats/">查看全部 {cats.length} 只 <span aria-hidden="true">↗</span></a>
+      <a class="section-more" href="/cats/">查看全部 {cats.length} 只 <span class="icon icon-arrow-up-right" aria-hidden="true"></span></a>
     </div>
     <div class="cat-grid featured-grid">{picked.map((cat) => <CatCard cat={cat} />)}</div>
   </section>
@@ -41,14 +41,14 @@ const milestones = diary.filter((entry) => entry.data.milestone).slice(0, 3);
     <div class="container story-band-inner">
       <p class="eyebrow light">A NOTE FROM THE CAMPUS</p>
       <p>有时候，一段故事从一碗干净的水开始。<br /><span>再慢慢变成陪伴、救助，和一个新的家。</span></p>
-      <a href="/about/">认识猫猫侠 <span aria-hidden="true">↗</span></a>
+      <a href="/about/">认识猫猫侠 <span class="icon icon-arrow-up-right" aria-hidden="true"></span></a>
     </div>
   </section>
 
   <section class="section container" aria-labelledby="diary-title">
     <div class="section-heading">
       <div><p class="eyebrow">02 / FIELD NOTES</p><h2 id="diary-title">最近的园区日记</h2><p>绝育、照护、领养，还有不少意料之外的小插曲。</p></div>
-      <a class="section-more" href="/diary/">翻阅所有日记 <span aria-hidden="true">↗</span></a>
+      <a class="section-more" href="/diary/">翻阅所有日记 <span class="icon icon-arrow-up-right" aria-hidden="true"></span></a>
     </div>
     <div class="diary-grid home-diary-grid">{diary.slice(0, 3).map((entry) => <DiaryCard entry={entry} />)}</div>
   </section>
@@ -56,14 +56,14 @@ const milestones = diary.filter((entry) => entry.data.milestone).slice(0, 3);
   <section class="section timeline-teaser container" aria-labelledby="timeline-title">
     <div class="section-heading">
       <div><p class="eyebrow">03 / MILESTONES</p><h2 id="timeline-title">值得记住的日子</h2><p>从日记里挑出的重要时刻，沿着时间慢慢展开。</p></div>
-      <a class="section-more" href="/timeline/">查看完整时间轴 <span aria-hidden="true">↗</span></a>
+      <a class="section-more" href="/timeline/">查看完整时间轴 <span class="icon icon-arrow-up-right" aria-hidden="true"></span></a>
     </div>
     <div class="teaser-list">
       {milestones.map((entry) => (
         <a href={`/diary/${entry.data.date}/`} class="teaser-row">
           <time datetime={entry.data.date}>{entry.data.date.replaceAll('-', '.')}</time>
           <strong>{entry.data.title}</strong>
-          <span aria-hidden="true">↗</span>
+          <span class="icon icon-arrow-up-right" aria-hidden="true"></span>
         </a>
       ))}
     </div>

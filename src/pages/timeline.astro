@@ -9,8 +9,8 @@ const milestones = (await getCollection('diary')).filter((entry) => entry.data.m
 <SiteLayout title="大事记" description="沿着时间轴，回看 PCL 猫猫值得记住的时刻。">
   <section class="page-intro container"><p class="eyebrow">MILESTONES / 大事记</p><h1>有些日子，<br /><span>会记得更久。</span></h1><p>大事记从日记里选出。每一个节点都可以打开当天的完整记录。</p></section>
   <section class="container timeline-page" aria-label="猫猫大事记时间轴">
-    <div class="timeline-year">2026 <span>春 → 秋</span></div>
-    <div class="timeline-track">{milestones.map((entry, index) => <article class:list={['timeline-event', index % 2 === 1 && 'timeline-event-right']}><div class="timeline-dot" aria-hidden="true"></div><a href={diaryUrl(entry.data.date)} class="timeline-event-card">{entry.data.cover && <img src={entry.data.cover} alt="" loading="lazy" width="640" height="400" />}<div class="timeline-event-body"><time datetime={entry.data.date}>{formatDate(entry.data.date)}</time><h2>{entry.data.title}</h2><p>{excerpt(entry.body ?? '', 90)}</p><span class="text-link">读当天日记 <span aria-hidden="true">↗</span></span></div></a></article>)}</div>
-    <div class="timeline-end"><span>故事还在继续</span><a href="/diary/">翻阅全部日记 ↗</a></div>
+    <div class="timeline-year">2026 <span>春至秋</span></div>
+    <div class="timeline-track">{milestones.map((entry, index) => <article class:list={['timeline-event', index % 2 === 1 && 'timeline-event-right']}><div class="timeline-dot" aria-hidden="true"></div><a href={diaryUrl(entry.data.date)} class="timeline-event-card">{entry.data.cover && <img src={entry.data.cover} alt="" loading="lazy" width="640" height="400" />}<div class="timeline-event-body"><time datetime={entry.data.date}>{formatDate(entry.data.date)}</time><h2>{entry.data.title}</h2><p>{excerpt(entry.body ?? '', 90)}</p><span class="text-link">读当天日记 <span class="icon icon-arrow-up-right" aria-hidden="true"></span></span></div></a></article>)}</div>
+    <div class="timeline-end"><span>故事还在继续</span><a href="/diary/">翻阅全部日记 <span class="icon icon-arrow-up-right" aria-hidden="true"></span></a></div>
   </section>
 </SiteLayout>

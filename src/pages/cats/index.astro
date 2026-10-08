@@ -22,7 +22,7 @@ cats.sort((a, b) => order.indexOf(a.id) - order.indexOf(b.id));
         <button class="filter-button" type="button" data-status="已领养" aria-pressed="false">已领养</button>
         <button class="filter-button" type="button" data-status="失踪" aria-pressed="false">失踪</button>
       </div>
-      <label class="search-field"><span class="sr-only">搜索猫咪名字或花色</span><span aria-hidden="true">⌕</span><input id="cat-search" type="search" placeholder="搜索名字或花色" autocomplete="off" /></label>
+      <label class="search-field"><span class="sr-only">搜索猫咪名字或花色</span><span class="icon icon-search" aria-hidden="true"></span><input id="cat-search" type="search" placeholder="搜索名字或花色" autocomplete="off" /></label>
     </div>
     <p id="cat-result" class="result-note" aria-live="polite">共 {cats.length} 只猫猫</p>
     <div class="cat-grid catalog-grid" id="cat-grid">
