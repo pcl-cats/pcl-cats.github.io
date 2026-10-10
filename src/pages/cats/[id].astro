@@ -32,7 +32,7 @@ const diary = (await getCollection('diary')).filter((entry) => entry.data.cats?.
         {cat.data.sterilized !== undefined && <div><dt>绝育状态</dt><dd>{cat.data.sterilized ? '已绝育' : '暂未绝育'}</dd></div>}
       </dl>
       {relatives.length > 0 && <div class="profile-relations"><h2>认识它的伙伴</h2><div class="relation-list">{relatives.map((relation) => relation.cat && <a href={catUrl(relation.cat.id)}><img src={relation.cat.data.photo} alt="" loading="lazy" width="56" height="56" /><span><small>{relation.label}</small><strong>{relation.cat.data.name}</strong></span><span class="icon icon-arrow-up-right" aria-hidden="true"></span></a>)}</div></div>}
-      <p class="profile-asof">档案据截至 2026 年 10 月 8 日的记录整理，状态可能变化。</p>
+      <p class="profile-asof">档案据截至 2026 年 10 月 9 日的记录整理，状态可能变化。</p>
     </div>
   </section>
   {diary.length > 0 && <section class="section container" aria-labelledby="cat-diary-title"><div class="section-heading"><div><p class="eyebrow">FIELD NOTES</p><h2 id="cat-diary-title">{cat.data.name} 的日记</h2><p>与这只猫有关的照护和相遇。</p></div><a class="section-more" href={`/diary/?cat=${cat.id}`}>查看全部 {diary.length} 篇 <span class="icon icon-arrow-up-right" aria-hidden="true"></span></a></div><div class="diary-grid">{diary.slice(0, 3).map((entry) => <DiaryCard entry={entry} variant="compact" />)}</div></section>}
