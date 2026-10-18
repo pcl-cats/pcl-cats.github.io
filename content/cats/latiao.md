@@ -1,7 +1,7 @@
 ---
 id: latiao
 name: 辣条
-photo: /images/cats/latiao.webp
+photo: /images/cats/latiao-2026-10-16.webp
 appearance: 橘猫
 status: 园区活动
 sterilized: false
