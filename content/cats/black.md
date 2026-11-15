@@ -7,6 +7,8 @@ status: 园区活动
 sterilized: false
 sex: 公猫
 relations:
+- cat: jojo
+  label: 兄弟姐妹
 - cat: hupo
   label: 兄弟姐妹
 - cat: jindou
@@ -22,3 +24,5 @@ relations:
 因全身黑色，取名为 black（布莱克）。
 
 四只小猫的妈妈已命名为咖啡，另一位兄弟姐妹名叫库洛米。
+
+11 月 15 日整理的档案补充确认：与 jojo 也是兄弟姐妹。

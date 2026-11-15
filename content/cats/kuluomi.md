@@ -7,6 +7,8 @@ status: 园区活动
 sterilized: false
 sex: 母猫
 relations:
+- cat: jojo
+  label: 兄弟姐妹
 - cat: black
   label: 兄弟姐妹
 - cat: hupo
@@ -18,3 +20,5 @@ relations:
 ---
 
 母猫，未绝育。2026 年 11 月 13 日在地下车库被捕猫笼捕获。因年纪较小，暂时还不能绝育。
+
+11 月 15 日整理的档案补充确认：与 jojo 也是兄弟姐妹。
