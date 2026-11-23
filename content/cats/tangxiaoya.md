@@ -3,7 +3,7 @@ id: tangxiaoya
 name: 唐小鸭
 photo: /images/cats/tangxiaoya.webp
 appearance: 橘白
-status: 园区活动
+status: 已领养
 sterilized: false
 sex: 公猫
 ---
@@ -21,3 +21,5 @@ sex: 公猫
 2026 年 11 月 9 日，天气降温，因有些营养不良，被带到室内暂养两天。
 
 与金条是好朋友，非常亲人；人蹲下时会跳上大腿贴近，但目前还不太会收爪。
+
+2026 年 11 月 23 日，被领养人接回家。

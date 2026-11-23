@@ -3,7 +3,7 @@ id: jintiao
 name: 金条
 photo: /images/cats/jintiao.webp
 appearance: 橘猫
-status: 园区活动
+status: 已领养
 sterilized: false
 sex: 公猫
 ---
@@ -27,3 +27,5 @@ sex: 公猫
 2026 年 11 月 9 日，天气降温，因有些营养不良，被带到室内暂养两天。
 
 与唐小鸭是好朋友。
+
+已被领养，有自己的家了。
