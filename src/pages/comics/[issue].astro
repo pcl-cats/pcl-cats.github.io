@@ -1,14 +1,101 @@
 ---
-import { getCollection, render } from 'astro:content';
 import SiteLayout from '../../layouts/SiteLayout.astro';
-import type { CollectionEntry } from 'astro:content';
+import Icon from '../../components/Icon.astro';
+import { comicSlug, comicUrl, getComics, type Comic } from '../../lib/content';
 
 export async function getStaticPaths() {
-  const comics = await getCollection('comics');
-  return comics.map((comic) => ({ params: { issue: String(comic.data.issue).padStart(2, '0') }, props: { comic } }));
+  const comics = await getComics();
+  return comics.map((comic, index) => ({
+    params: { issue: comicSlug(comic.data.issue) },
+    props: { comic, prev: comics[index - 1], next: comics[index + 1] },
+  }));
 }
-const { comic } = Astro.props as { comic: CollectionEntry<'comics'> };
-const { Content } = await render(comic);
+
+const { comic, prev, next } = Astro.props as { comic: Comic; prev?: Comic; next?: Comic };
+const label = (item: Comic) => item.data.title.replace(/^第(\d+)期$/, '第 $1 期');
 ---
 
-<SiteLayout title={comic.data.title}><div class="container breadcrumb"><a href="/comics/">猫猫漫画</a><span>/</span><span>{comic.data.title}</span></div><section class="container comic-detail"><p class="eyebrow">CAT COMICS / ISSUE {String(comic.data.issue).padStart(2, '0')}</p><h1>{comic.data.title}</h1><p>出场猫咪：{comic.data.cast}</p><div class="comic-pages prose"><Content /></div><div class="back-row"><a href="/comics/"><span class="icon icon-arrow-left" aria-hidden="true"></span> 返回全部漫画</a></div></section></SiteLayout>
+<SiteLayout title={label(comic)} description={`猫猫漫画${label(comic)}，出场：${comic.data.cast}。`} image={comic.data.images[0]}>
+  <article class="container container-narrow">
+    <a class="back" href="/comics/"><Icon name="arrow-left" size={18} /> 猫猫漫画</a>
+    <header>
+      <h1>{label(comic)}</h1>
+      <p>出场：{comic.data.cast}</p>
+    </header>
+    <div class="pages">
+      {comic.data.images.map((src, index) => <img src={src} alt={`${label(comic)}，第 ${index + 1} 页`} width="1080" height="1400" loading={index === 0 ? 'eager' : 'lazy'} decoding="async" />)}
+    </div>
+    <nav class="pager" aria-label="相邻的漫画">
+      {prev ? <a href={comicUrl(prev.data.issue)}><Icon name="arrow-left" size={16} /> {label(prev)}</a> : <span />}
+      {next && <a href={comicUrl(next.data.issue)}>{label(next)} <Icon name="arrow-right" size={16} /></a>}
+    </nav>
+  </article>
+</SiteLayout>
+
+<style>
+  .back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 16px 0 8px;
+    font-size: 15px;
+    color: var(--text-soft);
+  }
+
+  .back:hover {
+    color: var(--heading);
+  }
+
+  header {
+    padding: 16px 0 24px;
+  }
+
+  h1 {
+    font-size: clamp(32px, 7vw, 44px);
+  }
+
+  header p {
+    margin-top: 4px;
+    color: var(--text-soft);
+  }
+
+  .pages {
+    display: grid;
+    gap: 16px;
+  }
+
+  .pages img {
+    width: 100%;
+    height: auto;
+    border-radius: var(--radius-sm);
+    background: var(--card);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .pager {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 32px;
+  }
+
+  .pager a {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 46px;
+    padding: 0 18px;
+    border-radius: 999px;
+    background: var(--card);
+    box-shadow: inset 0 0 0 1px var(--line);
+    font-family: var(--font-hand);
+    font-size: 17px;
+    color: var(--heading);
+  }
+
+  .pager a:hover {
+    box-shadow:
+      inset 0 0 0 1px var(--line-strong),
+      var(--shadow-sm);
+  }
+</style>

@@ -1,71 +1,344 @@
 ---
-import { getCollection } from 'astro:content';
 import SiteLayout from '../layouts/SiteLayout.astro';
-import CatCard from '../components/CatCard.astro';
-import DiaryCard from '../components/DiaryCard.astro';
+import MonthSticker from '../components/MonthSticker.astro';
+import DiaryRow from '../components/DiaryRow.astro';
+import CatAvatar from '../components/CatAvatar.astro';
+import Icon from '../components/Icon.astro';
+import { diaryUrl, getCats, getDiary, shortDate } from '../lib/content';
 
-const cats = await getCollection('cats');
-const diary = (await getCollection('diary')).sort((a, b) => b.data.date.localeCompare(a.data.date));
-const picked = ['huahua', 'xionger', 'erbao', 'shatangju'].map((id) => cats.find((cat) => cat.id === id)).filter((cat) => cat !== undefined);
-const milestones = diary.filter((entry) => entry.data.milestone).slice(0, 3);
+const cats = await getCats();
+const diary = await getDiary();
+const recent = diary.slice(0, 4);
+const milestones = diary.filter((entry) => entry.data.milestone).slice(0, 5);
+const onCampus = cats.filter((cat) => cat.data.status === '园区活动');
+const adopted = cats.filter((cat) => cat.data.status === '已领养').length;
 ---
 
 <SiteLayout>
   <section class="hero container">
-    <div class="hero-copy">
-      <p class="eyebrow light">PCL CATS <span>／</span> 园区猫咪观察手册</p>
-      <h1>这里的每只猫，<br /><em>都有自己的名字。</em></h1>
-      <p class="hero-intro">从快递站到四栋平台，认识那些常常与你擦肩而过的小家伙，也看看属于它们的日常。</p>
-      <div class="hero-actions">
-        <a class="button button-light" href="/cats/">去认识猫猫 <span class="icon icon-arrow-up-right" aria-hidden="true"></span></a>
-        <a class="hero-link" href="/diary/">翻开照护日记 <span class="icon icon-arrow-right" aria-hidden="true"></span></a>
-      </div>
-      <div class="hero-footnote"><strong>{cats.length}</strong><span>份猫咪档案<br />还在继续更新</span></div>
+    <div class="hero-text">
+      <h1 data-reveal>你好，<br />这里是 <span class="nowrap">PCL 猫猫</span></h1>
+      <p class="intro" data-reveal style="--i: 1">
+        我们是园区里一群喜欢猫的学生和老师。平时给猫猫添粮、送医、做绝育，也帮它们找新家。这里有每只猫的档案，和我们的照护日记。
+      </p>
+      <form class="search" action="/cats/" role="search" data-reveal style="--i: 2">
+        <label class="field">
+          <span class="visually-hidden">按名字或花色找猫</span>
+          <Icon name="search" />
+          <input name="q" type="search" placeholder="猫猫的名字或花色" autocomplete="off" enterkeyhint="search" />
+        </label>
+        <button class="button" type="submit">找猫</button>
+      </form>
+      <p class="count" data-reveal style="--i: 3">
+        目前记录了 <strong>{cats.length}</strong> 只猫，其中 <strong>{adopted}</strong> 只已经有了家。
+      </p>
     </div>
-    <div class="hero-photos" aria-label="园区猫咪照片">
-      <div class="hero-photo hero-photo-main"><img src="/images/cats/xionger.webp" alt="熊二坐在园区里" width="700" height="840" /><span>熊二 <small>／ 四栋平台</small></span></div>
-      <div class="hero-photo hero-photo-side"><img src="/images/cats/huahua.webp" alt="花花卧在路边" width="450" height="520" /><span>花花</span></div>
-      <div class="hero-stamp">认真记录<br />自由生长 <span class="hero-stamp-icon icon icon-sparkle" aria-hidden="true"></span></div>
+    <div class="hero-art" data-reveal style="--i: 1">
+      <MonthSticker />
     </div>
   </section>
+
+  <div class="container news">
+    <section class="section recent" aria-labelledby="recent-title">
+      <div class="section-head">
+        <h2 id="recent-title">最近的日记</h2>
+        <a class="more-link" href="/diary/">全部日记 <Icon name="arrow-right" /></a>
+      </div>
+      <div class="rows">
+        {recent.map((entry, i) => <div data-reveal style={`--i: ${i}`}><DiaryRow entry={entry} sub="month" /></div>)}
+      </div>
+    </section>
+
+    <section class="section milestones" aria-labelledby="milestones-title">
+      <div class="section-head">
+        <h2 id="milestones-title">大事记</h2>
+        <a class="more-link" href="/diary/?view=milestones">全部大事记 <Icon name="arrow-right" /></a>
+      </div>
+      <ol class="timeline">
+        {
+          milestones.map((entry, i) => (
+            <li data-reveal style={`--i: ${i}`}>
+              <a href={diaryUrl(entry.data.date)}>
+                <time datetime={entry.data.date}>{shortDate(entry.data.date)}</time>
+                <span>{entry.data.title}</span>
+              </a>
+            </li>
+          ))
+        }
+      </ol>
+    </section>
+  </div>
 
   <section class="section container" aria-labelledby="cats-title">
-    <div class="section-heading">
-      <div><p class="eyebrow">01 / THE CATS</p><h2 id="cats-title">先认识几位老朋友</h2><p>每只猫都有自己的脾气和故事。</p></div>
-      <a class="section-more" href="/cats/">查看全部 {cats.length} 只 <span class="icon icon-arrow-up-right" aria-hidden="true"></span></a>
+    <div class="section-head">
+      <h2 id="cats-title">园区里的猫</h2>
+      <a class="more-link" href="/cats/">全部 {cats.length} 只 <Icon name="arrow-right" /></a>
     </div>
-    <div class="cat-grid featured-grid">{picked.map((cat) => <CatCard cat={cat} />)}</div>
-  </section>
-
-  <section class="story-band">
-    <div class="container story-band-inner">
-      <p class="eyebrow light">A NOTE FROM THE CAMPUS</p>
-      <p>有时候，一段故事从一碗干净的水开始。<br /><span>再慢慢变成陪伴、救助，和一个新的家。</span></p>
-      <a href="/about/">认识猫猫侠 <span class="icon icon-arrow-up-right" aria-hidden="true"></span></a>
+    <div class="cat-row">
+      {onCampus.slice(0, 12).map((cat, i) => <div data-reveal style={`--i: ${i % 6}`}><CatAvatar cat={cat} size={84} transition={false} /></div>)}
     </div>
   </section>
 
-  <section class="section container" aria-labelledby="diary-title">
-    <div class="section-heading">
-      <div><p class="eyebrow">02 / FIELD NOTES</p><h2 id="diary-title">最近的园区日记</h2><p>绝育、照护、领养，还有不少意料之外的小插曲。</p></div>
-      <a class="section-more" href="/diary/">翻阅所有日记 <span class="icon icon-arrow-up-right" aria-hidden="true"></span></a>
-    </div>
-    <div class="diary-grid home-diary-grid">{diary.slice(0, 3).map((entry) => <DiaryCard entry={entry} />)}</div>
-  </section>
-
-  <section class="section timeline-teaser container" aria-labelledby="timeline-title">
-    <div class="section-heading">
-      <div><p class="eyebrow">03 / MILESTONES</p><h2 id="timeline-title">值得记住的日子</h2><p>从日记里挑出的重要时刻，沿着时间慢慢展开。</p></div>
-      <a class="section-more" href="/timeline/">查看完整时间轴 <span class="icon icon-arrow-up-right" aria-hidden="true"></span></a>
-    </div>
-    <div class="teaser-list">
-      {milestones.map((entry) => (
-        <a href={`/diary/${entry.data.date}/`} class="teaser-row">
-          <time datetime={entry.data.date}>{entry.data.date.replaceAll('-', '.')}</time>
-          <strong>{entry.data.title}</strong>
-          <span class="icon icon-arrow-up-right" aria-hidden="true"></span>
-        </a>
-      ))}
+  <section class="section container">
+    <div class="join" data-reveal>
+      <img src="/art/months/04.webp" alt="" width="640" height="460" loading="lazy" />
+      <div>
+        <h2>想一起照顾它们？</h2>
+        <p>领养一只猫，买一件猫猫文创，或者路过时给它们添一碗清水，都是在帮忙。</p>
+        <a class="button" href="/about/">认识我们</a>
+      </div>
     </div>
   </section>
 </SiteLayout>
+
+<style>
+  /* ---------- 开头 ---------- */
+
+  .hero {
+    display: grid;
+    gap: 8px;
+    padding-top: 28px;
+  }
+
+  .hero h1 {
+    font-size: clamp(36px, 9vw, 60px);
+    line-height: 1.25;
+  }
+
+  .nowrap {
+    white-space: nowrap;
+  }
+
+  .intro {
+    margin-top: 16px;
+    max-width: 30em;
+    font-size: 17px;
+    line-height: 1.85;
+  }
+
+  .search {
+    display: flex;
+    gap: 8px;
+    margin-top: 24px;
+    max-width: 460px;
+  }
+
+  .search .field {
+    flex: 1;
+  }
+
+  .search input {
+    min-height: 50px;
+  }
+
+  .search .button {
+    min-height: 50px;
+    flex: none;
+  }
+
+  .count {
+    margin-top: 16px;
+    font-size: 15px;
+    color: var(--text-soft);
+  }
+
+  .count strong {
+    font-family: var(--font-hand);
+    font-weight: 400;
+    font-size: 20px;
+    color: var(--heading);
+    padding-inline: 1px;
+  }
+
+  .hero-art {
+    order: -1;
+    width: min(66vw, 280px);
+    margin-bottom: -4px;
+    justify-self: center;
+  }
+
+  @media (min-width: 720px) {
+    .hero {
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+      align-items: center;
+      gap: 40px;
+      padding-top: 56px;
+    }
+
+    .hero h1 {
+      font-size: clamp(36px, 5.6vw, 60px);
+    }
+
+    .hero-art {
+      order: 0;
+      width: 100%;
+      max-width: 440px;
+    }
+  }
+
+  /* ---------- 最近 + 大事记 ---------- */
+
+  .rows {
+    display: grid;
+  }
+
+  .rows > div + div {
+    border-top: 1px solid var(--line);
+  }
+
+  .timeline {
+    list-style: none;
+    margin: 0;
+    padding: 4px 0 0;
+    position: relative;
+  }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 5px;
+    top: 14px;
+    bottom: 14px;
+    width: 2px;
+    border-radius: 2px;
+    background: var(--gold-soft);
+  }
+
+  .timeline a {
+    position: relative;
+    display: grid;
+    gap: 2px;
+    padding: 10px 0 10px 28px;
+  }
+
+  .timeline a::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 17px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--paper);
+    border: 2.5px solid var(--gold);
+    transition:
+      background 0.2s,
+      transform 0.3s var(--ease-out);
+  }
+
+  .timeline a:hover::before {
+    background: var(--gold);
+    transform: scale(1.2);
+  }
+
+  .timeline time {
+    font-size: 14px;
+    color: var(--gold-ink);
+  }
+
+  .timeline span {
+    font-family: var(--font-hand);
+    font-size: 18px;
+    line-height: 1.45;
+    color: var(--heading);
+  }
+
+  .timeline a:hover span {
+    text-decoration: underline;
+    text-decoration-color: var(--gold);
+    text-underline-offset: 4px;
+  }
+
+  @media (min-width: 960px) {
+    .news {
+      display: grid;
+      grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+      gap: 64px;
+    }
+  }
+
+  /* ---------- 猫猫头像 ---------- */
+
+  .cat-row {
+    display: grid;
+    grid-auto-flow: column;
+    grid-template-rows: repeat(2, auto);
+    justify-content: start;
+    gap: 18px 10px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--gutter);
+    scrollbar-width: none;
+    margin-inline: calc(var(--gutter) * -1);
+    padding: 6px var(--gutter) 4px;
+  }
+
+  .cat-row::-webkit-scrollbar {
+    display: none;
+  }
+
+  .cat-row > div {
+    scroll-snap-align: start;
+  }
+
+  @media (min-width: 768px) {
+    .cat-row {
+      grid-auto-flow: row;
+      grid-template-rows: none;
+      grid-template-columns: repeat(6, 1fr);
+      justify-items: center;
+      overflow: visible;
+      margin-inline: 0;
+      padding-inline: 0;
+      gap: 28px 16px;
+    }
+  }
+
+  /* ---------- 一起照顾 ---------- */
+
+  .join {
+    display: grid;
+    gap: 8px;
+    padding: 28px 24px 32px;
+    border-radius: 28px;
+    background: var(--paper-deep);
+    text-align: center;
+    justify-items: center;
+  }
+
+  .join img {
+    width: min(100%, 300px);
+    height: auto;
+    margin-top: -64px;
+  }
+
+  .join h2 {
+    font-size: clamp(26px, 5vw, 34px);
+  }
+
+  .join p {
+    margin: 10px auto 22px;
+    max-width: 26em;
+    color: var(--text-soft);
+  }
+
+  @media (min-width: 768px) {
+    .join {
+      grid-template-columns: minmax(0, 0.9fr) minmax(0, 1fr);
+      align-items: center;
+      gap: 40px;
+      padding: 40px 56px;
+      text-align: left;
+      justify-items: start;
+    }
+
+    .join img {
+      margin: -72px 0 -24px;
+      width: 100%;
+    }
+
+    .join p {
+      margin-left: 0;
+    }
+  }
+</style>

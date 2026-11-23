@@ -1,0 +1,44 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+---
+
+<SiteLayout title="找不到这一页">
+  <section class="container lost">
+    <button class="peek" type="button" aria-label="摸摸猫" data-pet data-meow>
+      <img src="/art/cats/jojo-2.webp" alt="" width="200" height="240" />
+    </button>
+    <h1>这一页找不到了</h1>
+    <p>可能是链接变了。回首页看看猫猫吧。</p>
+    <a class="button" href="/">回到首页</a>
+  </section>
+</SiteLayout>
+
+<style>
+  .lost {
+    display: grid;
+    justify-items: center;
+    gap: 12px;
+    padding-top: 64px;
+    text-align: center;
+  }
+
+  .peek {
+    position: relative;
+    width: 150px;
+    margin-bottom: 8px;
+  }
+
+  .peek img {
+    width: 100%;
+    height: auto;
+  }
+
+  h1 {
+    font-size: clamp(30px, 7vw, 42px);
+  }
+
+  p {
+    color: var(--text-soft);
+    margin-bottom: 12px;
+  }
+</style>

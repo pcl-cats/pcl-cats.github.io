@@ -1,40 +1,240 @@
 ---
-import { getCollection, render } from 'astro:content';
+import { render } from 'astro:content';
 import SiteLayout from '../../layouts/SiteLayout.astro';
-import DiaryCard from '../../components/DiaryCard.astro';
-import { catUrl } from '../../lib/content';
-import type { Cat } from '../../lib/content';
+import CatAvatar from '../../components/CatAvatar.astro';
+import DiaryRow from '../../components/DiaryRow.astro';
+import Icon from '../../components/Icon.astro';
+import { catArt, catFacts, getCats, getDiary, statusLabel, statusTone, type Cat } from '../../lib/content';
 
 export async function getStaticPaths() {
-  const cats = await getCollection('cats');
+  const cats = await getCats();
   return cats.map((cat) => ({ params: { id: cat.id }, props: { cat } }));
 }
 
 const { cat } = Astro.props as { cat: Cat };
 const { Content } = await render(cat);
-const allCats = await getCollection('cats');
-const relatives = (cat.data.relations ?? []).map((relation) => ({ ...relation, cat: allCats.find((item) => item.id === relation.cat) })).filter((item) => item.cat !== undefined);
-const diary = (await getCollection('diary')).filter((entry) => entry.data.cats?.includes(cat.id)).sort((a, b) => b.data.date.localeCompare(a.data.date));
+const { name, photo, status } = cat.data;
+
+const cats = await getCats();
+const family = (cat.data.relations ?? [])
+  .map((relation) => ({ label: relation.label, cat: cats.find((item) => item.id === relation.cat) }))
+  .filter((item): item is { label: string; cat: Cat } => item.cat !== undefined);
+const diary = (await getDiary()).filter((entry) => entry.data.cats?.includes(cat.id));
+const poses = catArt(cat.id);
+const facts = catFacts(cat);
 ---
 
-<SiteLayout title={cat.data.name} description={`认识园区猫咪${cat.data.name}，看看它的档案和日记。`}>
-  <div class="container breadcrumb"><a href="/cats/">猫猫图鉴</a><span>/</span><span>{cat.data.name}</span></div>
-  <section class="cat-profile container">
-    <div class="profile-photo-wrap"><img class="profile-photo" src={cat.data.photo} alt={cat.data.name} width="800" height="950" /><span class="profile-photo-label">PCL CAT / {cat.data.name}</span></div>
-    <div class="profile-content">
-      <p class="eyebrow">MEET THE CAT <span>／</span> 猫咪档案</p>
-      <div class="profile-title-row"><h1>{cat.data.name}</h1><span class:list={['status-pill', cat.data.status === '已领养' && 'is-adopted', cat.data.status === '失踪' && 'is-missing']}>{cat.data.status}</span></div>
-      <div class="profile-story prose"><Content /></div>
-      <dl class="fact-grid">
-        {cat.data.appearance && <div><dt>花色 / 特征</dt><dd>{cat.data.appearance}</dd></div>}
-        {cat.data.birthMonth && <div><dt>档案生日</dt><dd>{cat.data.birthMonth}</dd></div>}
-        {cat.data.sex && <div><dt>性别</dt><dd>{cat.data.sex}</dd></div>}
-        {cat.data.sterilized !== undefined && <div><dt>绝育状态</dt><dd>{cat.data.sterilized ? '已绝育' : '暂未绝育'}</dd></div>}
-      </dl>
-      {relatives.length > 0 && <div class="profile-relations"><h2>认识它的伙伴</h2><div class="relation-list">{relatives.map((relation) => relation.cat && <a href={catUrl(relation.cat.id)}><img src={relation.cat.data.photo} alt="" loading="lazy" width="56" height="56" /><span><small>{relation.label}</small><strong>{relation.cat.data.name}</strong></span><span class="icon icon-arrow-up-right" aria-hidden="true"></span></a>)}</div></div>}
-      <p class="profile-asof">档案据截至 2026 年 11 月 22 日的记录整理，状态可能变化。</p>
+<SiteLayout title={name} description={`园区猫猫${name}的档案和日记。`} image={photo}>
+  <div class="container">
+    <a class="back" href="/cats/"><Icon name="arrow-left" size={18} /> 园区的猫</a>
+  </div>
+
+  <article class="profile container">
+    <div class="media">
+      <div class="photo">
+        <img src={photo} alt={name} width="800" height="1000" style={`view-transition-name: cat-${cat.id}`} />
+      </div>
+      {
+        poses.length > 0 && (
+          <button class="doodle" type="button" aria-label={`摸摸${name}`} data-pet data-meow data-poses={JSON.stringify(poses)}>
+            <img src={poses[0]} alt="" width="200" height="200" />
+          </button>
+        )
+      }
     </div>
-  </section>
-  {diary.length > 0 && <section class="section container" aria-labelledby="cat-diary-title"><div class="section-heading"><div><p class="eyebrow">FIELD NOTES</p><h2 id="cat-diary-title">{cat.data.name} 的日记</h2><p>与这只猫有关的照护和相遇。</p></div><a class="section-more" href={`/diary/?cat=${cat.id}`}>查看全部 {diary.length} 篇 <span class="icon icon-arrow-up-right" aria-hidden="true"></span></a></div><div class="diary-grid">{diary.slice(0, 3).map((entry) => <DiaryCard entry={entry} variant="compact" />)}</div></section>}
-  <div class="container back-row"><a href="/cats/"><span class="icon icon-arrow-left" aria-hidden="true"></span> 返回猫猫图鉴</a></div>
+
+    <div class="info">
+      <div class="title">
+        <h1>{name}</h1>
+        <span class:list={['tag', `tag-${statusTone[status]}`]}>{statusLabel[status]}</span>
+      </div>
+      {facts.length > 0 && <ul class="facts">{facts.map((fact) => <li>{fact}</li>)}</ul>}
+      <div class="story prose"><Content /></div>
+
+      {
+        family.length > 0 && (
+          <section class="family" aria-labelledby="family-title">
+            <h2 id="family-title">家人和伙伴</h2>
+            <div class="family-list">
+              {family.map((item) => <CatAvatar cat={item.cat} label={item.label} size={64} transition={false} />)}
+            </div>
+          </section>
+        )
+      }
+
+      {
+        diary.length > 0 && (
+          <section class="diary" aria-labelledby="diary-title">
+            <div class="section-head">
+              <h2 id="diary-title">和{name}有关的日记</h2>
+              {diary.length > 5 && (
+                <a class="more-link" href={`/diary/?cat=${cat.id}`}>
+                  全部 {diary.length} 篇 <Icon name="arrow-right" />
+                </a>
+              )}
+            </div>
+            <div class="rows">
+              {diary.slice(0, 5).map((entry) => <DiaryRow entry={entry} sub="month" />)}
+            </div>
+          </section>
+        )
+      }
+    </div>
+  </article>
+
 </SiteLayout>
+
+<style>
+  .back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 16px 0 12px;
+    font-size: 15px;
+    color: var(--text-soft);
+  }
+
+  .back:hover {
+    color: var(--heading);
+  }
+
+  .profile {
+    display: grid;
+    gap: 28px;
+  }
+
+  .media {
+    position: relative;
+    align-self: start;
+  }
+
+  .photo {
+    aspect-ratio: 4 / 5;
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: var(--paper-deep);
+    box-shadow: var(--shadow);
+  }
+
+  .photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .doodle {
+    position: absolute;
+    right: -6px;
+    bottom: -26px;
+    width: 34%;
+    max-width: 170px;
+    animation: say-hi 1.2s 1s var(--ease-out) both;
+  }
+
+  .doodle img {
+    width: 100%;
+    height: auto;
+    filter: drop-shadow(0 6px 10px rgb(74 52 28 / 0.2));
+  }
+
+  @keyframes say-hi {
+    0% {
+      opacity: 0;
+      transform: translateY(16px) scale(0.85);
+    }
+    55% {
+      opacity: 1;
+      transform: translateY(-4px) rotate(-4deg);
+    }
+    80% {
+      transform: rotate(3deg);
+    }
+    100% {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  .title {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px 14px;
+  }
+
+  h1 {
+    font-size: clamp(40px, 10vw, 60px);
+    line-height: 1.15;
+  }
+
+  .facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 16px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .facts li {
+    padding: 4px 12px;
+    border-radius: 999px;
+    background: var(--card);
+    box-shadow: inset 0 0 0 1px var(--line);
+    font-size: 15px;
+    color: var(--text-soft);
+  }
+
+  .story {
+    margin-top: 22px;
+  }
+
+  .family {
+    margin-top: 36px;
+  }
+
+  .family h2 {
+    font-size: 22px;
+    margin-bottom: 14px;
+  }
+
+  .family-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px 6px;
+  }
+
+  .diary {
+    margin-top: 44px;
+  }
+
+  .diary h2 {
+    font-size: 22px;
+  }
+
+  .rows > :global(* + *) {
+    border-top: 1px solid var(--line);
+  }
+
+  @media (min-width: 720px) {
+    .profile {
+      grid-template-columns: minmax(0, 0.9fr) minmax(0, 1fr);
+      gap: clamp(36px, 5vw, 64px);
+      padding-top: 16px;
+    }
+
+    .media {
+      position: sticky;
+      top: 100px;
+    }
+
+    .doodle {
+      right: -20px;
+      bottom: -32px;
+    }
+
+    .info {
+      padding-top: 12px;
+    }
+  }
+</style>

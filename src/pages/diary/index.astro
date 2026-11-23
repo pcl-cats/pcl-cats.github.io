@@ -1,58 +1,182 @@
 ---
-import { getCollection } from 'astro:content';
 import SiteLayout from '../../layouts/SiteLayout.astro';
-import DiaryCard from '../../components/DiaryCard.astro';
+import DiaryRow from '../../components/DiaryRow.astro';
+import Icon from '../../components/Icon.astro';
+import { formatMonth, getCats, getDiary, type Diary } from '../../lib/content';
 
-const entries = (await getCollection('diary')).sort((a, b) => b.data.date.localeCompare(a.data.date));
-const cats = (await getCollection('cats')).sort((a, b) => a.data.name.localeCompare(b.data.name, 'zh-CN'));
+const entries = await getDiary();
+const cats = (await getCats()).sort((a, b) => a.data.name.localeCompare(b.data.name, 'zh-CN'));
 const catNames = new Map(cats.map((cat) => [cat.id, cat.data.name]));
-const months = new Map<string, typeof entries>();
+const milestoneCount = entries.filter((entry) => entry.data.milestone).length;
+
+const months = new Map<string, Diary[]>();
 for (const entry of entries) {
   const month = entry.data.date.slice(0, 7);
-  if (!months.has(month)) months.set(month, []);
-  months.get(month)?.push(entry);
+  months.set(month, [...(months.get(month) ?? []), entry]);
 }
+
+const searchText = (entry: Diary) =>
+  [entry.data.title, entry.body ?? '', ...(entry.data.cats ?? []).map((id) => catNames.get(id) ?? '')].join(' ').toLowerCase();
 ---
 
-<SiteLayout title="园区日记" description="按日期翻阅 PCL 猫猫的日常照护、救助和领养记录。">
-  <section class="page-intro container">
-    <p class="eyebrow">FIELD NOTES / 园区日记</p>
-    <h1>每一天的小事，<br /><span>都有猫在场。</span></h1>
-    <p>这里记录喂养、绝育、就医与领养，也留下那些让人会心一笑的瞬间。按时间翻阅，或找一只猫的故事。</p>
-  </section>
-  <section class="container diary-archive" aria-label="日记列表">
-    <div class="archive-toolbar">
-      <label class="search-field"><span class="sr-only">搜索日记</span><span class="icon icon-search" aria-hidden="true"></span><input id="diary-search" type="search" placeholder="搜索日记内容" autocomplete="off" /></label>
-      <label class="select-field"><span class="sr-only">按猫咪筛选日记</span><select id="diary-cat"><option value="">全部猫咪</option>{cats.map((cat) => <option value={cat.id}>{cat.data.name}</option>)}</select><span class="icon icon-chevron-down" aria-hidden="true"></span></label>
-      <p id="diary-result" aria-live="polite">共 {entries.length} 篇日记</p>
+<SiteLayout title="日记" description="PCL 园区猫猫的照护日记：添粮、送医、绝育和领养。">
+  <header class="page-head container container-narrow">
+    <h1>日记</h1>
+    <p>照顾猫猫的日常，最新的写在最前面。</p>
+  </header>
+
+  <section class="container container-narrow" aria-label="日记列表">
+    <div class="toolbar">
+      <div class="chips" role="group" aria-label="显示">
+        <button class="chip" type="button" data-view="" aria-pressed="true">全部 <small>{entries.length}</small></button>
+        <button class="chip" type="button" data-view="milestones" aria-pressed="false">
+          大事记 <small>{milestoneCount}</small>
+        </button>
+      </div>
+      <div class="filters">
+        <label class="field">
+          <span class="visually-hidden">搜索日记</span>
+          <Icon name="search" />
+          <input id="diary-search" type="search" placeholder="搜一搜" autocomplete="off" enterkeyhint="search" />
+        </label>
+        <label class="field">
+          <span class="visually-hidden">只看某只猫</span>
+          <select id="diary-cat">
+            <option value="">所有猫猫</option>
+            {cats.map((cat) => <option value={cat.id}>{cat.data.name}</option>)}
+          </select>
+          <Icon name="chevron-down" />
+        </label>
+      </div>
     </div>
-    {[...months].map(([month, monthEntries]) => <section class="month-section" data-month-section><div class="month-heading"><h2>{month.replace('-', ' 年 ')} 月</h2><span>{monthEntries.length} 篇记录</span></div><div class="diary-grid archive-grid">{monthEntries.map((entry) => <div class="archive-item" data-cats={(entry.data.cats ?? []).join(' ')} data-search={`${entry.data.title} ${entry.body ?? ''} ${(entry.data.cats ?? []).map((id) => catNames.get(id) ?? '').join(' ')}`.toLowerCase()}><DiaryCard entry={entry} /></div>)}</div></section>)}
-    <p class="empty-state" id="diary-empty" hidden>没有找到相关日记，试试其他关键词或猫咪。</p>
+
+    {
+      [...months].map(([month, list]) => (
+        <section class="month" data-month>
+          <h2>{formatMonth(month)}</h2>
+          <div class="rows">
+            {list.map((entry) => (
+              <div
+                class="item"
+                data-milestone={entry.data.milestone ? '' : undefined}
+                data-cats={(entry.data.cats ?? []).join(' ')}
+                data-search={searchText(entry)}
+              >
+                <DiaryRow entry={entry} />
+              </div>
+            ))}
+          </div>
+        </section>
+      ))
+    }
+
+    <div class="empty" id="diary-empty" hidden>
+      <img src="/art/cats/natie-6.webp" alt="" width="180" height="180" loading="lazy" />
+      <p>没有找到相关的日记。</p>
+    </div>
   </section>
-  <script>
-    const search = document.querySelector<HTMLInputElement>('#diary-search');
-    const select = document.querySelector<HTMLSelectElement>('#diary-cat');
-    const items = [...document.querySelectorAll<HTMLElement>('.archive-item')];
-    const months = [...document.querySelectorAll<HTMLElement>('[data-month-section]')];
-    const result = document.querySelector<HTMLElement>('#diary-result');
-    const empty = document.querySelector<HTMLElement>('#diary-empty');
-    const requestedCat = new URLSearchParams(window.location.search).get('cat');
-    if (requestedCat && [...(select?.options ?? [])].some((option) => option.value === requestedCat) && select) select.value = requestedCat;
-    const update = () => {
-      const query = search?.value.trim().toLowerCase() ?? '';
-      const cat = select?.value ?? '';
-      let count = 0;
-      for (const item of items) {
-        const show = (!cat || (item.dataset.cats ?? '').split(' ').includes(cat)) && (item.dataset.search ?? '').includes(query);
-        item.hidden = !show;
-        if (show) count++;
-      }
-      months.forEach((month) => { month.hidden = !month.querySelector('.archive-item:not([hidden])'); });
-      if (result) result.textContent = `找到 ${count} 篇日记`;
-      if (empty) empty.hidden = count !== 0;
-    };
-    search?.addEventListener('input', update);
-    select?.addEventListener('change', update);
-    update();
-  </script>
 </SiteLayout>
+
+<script>
+  const search = document.querySelector<HTMLInputElement>('#diary-search')!;
+  const select = document.querySelector<HTMLSelectElement>('#diary-cat')!;
+  const chips = [...document.querySelectorAll<HTMLButtonElement>('.chip')];
+  const items = [...document.querySelectorAll<HTMLElement>('.item')];
+  const months = [...document.querySelectorAll<HTMLElement>('[data-month]')];
+  const empty = document.querySelector<HTMLElement>('#diary-empty')!;
+
+  const params = new URLSearchParams(location.search);
+  let view = params.get('view') === 'milestones' ? 'milestones' : '';
+  search.value = params.get('q') ?? '';
+  const requestedCat = params.get('cat');
+  if (requestedCat && [...select.options].some((option) => option.value === requestedCat)) select.value = requestedCat;
+
+  const update = () => {
+    const query = search.value.trim().toLowerCase();
+    const cat = select.value;
+    let shown = 0;
+    for (const item of items) {
+      const visible =
+        (!view || item.hasAttribute('data-milestone')) &&
+        (!cat || (item.dataset.cats ?? '').split(' ').includes(cat)) &&
+        (item.dataset.search ?? '').includes(query);
+      item.hidden = !visible;
+      if (visible) shown++;
+    }
+    for (const month of months) month.hidden = !month.querySelector('.item:not([hidden])');
+    for (const chip of chips) chip.setAttribute('aria-pressed', String(chip.dataset.view === view));
+    empty.hidden = shown > 0;
+
+    const next = new URLSearchParams();
+    if (view) next.set('view', view);
+    if (cat) next.set('cat', cat);
+    if (query) next.set('q', query);
+    const qs = next.toString();
+    history.replaceState(null, '', qs ? `?${qs}` : location.pathname);
+  };
+
+  for (const chip of chips) {
+    chip.addEventListener('click', () => {
+      view = chip.dataset.view ?? '';
+      update();
+    });
+  }
+  search.addEventListener('input', update);
+  select.addEventListener('change', update);
+  update();
+</script>
+
+<style>
+  .toolbar {
+    display: grid;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .filters {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    gap: 8px;
+  }
+
+  .month {
+    padding-top: 28px;
+  }
+
+  .month h2 {
+    position: sticky;
+    top: 60px;
+    z-index: 2;
+    padding: 8px 0;
+    font-size: 20px;
+    color: var(--gold-ink);
+    background: var(--paper);
+  }
+
+  .rows {
+    display: grid;
+  }
+
+  /* 只在两条可见的日记之间画线 */
+  .item:not([hidden]) ~ .item:not([hidden]) {
+    border-top: 1px solid var(--line);
+  }
+
+  @media (min-width: 768px) {
+    .toolbar {
+      grid-template-columns: auto 1fr;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .chips {
+      margin: 0;
+      padding: 0;
+    }
+
+    .month h2 {
+      top: 72px;
+      font-size: 22px;
+    }
+  }
+</style>

@@ -1,8 +1,103 @@
 ---
-import { getCollection } from 'astro:content';
 import SiteLayout from '../../layouts/SiteLayout.astro';
+import { comicUrl, getComics } from '../../lib/content';
 
-const comics = (await getCollection('comics')).sort((a, b) => a.data.issue - b.data.issue);
+const comics = (await getComics()).reverse();
 ---
 
-<SiteLayout title="猫猫漫画"><section class="page-intro container"><p class="eyebrow">CAT COMICS / 猫猫漫画</p><h1>猫的日常，<br /><span>也可以画出来。</span></h1><p>来自原始记录的 8 期小漫画。</p></section><section class="container comic-archive comic-grid">{comics.map((comic) => <a href={`/comics/${String(comic.data.issue).padStart(2, '0')}/`}><div><img src={comic.data.images[0]} alt={`${comic.data.title}漫画封面`} loading="lazy" width="400" height="520" /></div><strong>{comic.data.title}</strong><span>{comic.data.cast}</span></a>)}</section></SiteLayout>
+<SiteLayout title="猫猫漫画" description="PCL 园区猫猫的小漫画。">
+  <header class="page-head container">
+    <h1>猫猫漫画</h1>
+    <p>园区猫猫的小故事，一共 {comics.length} 期，新的在前面。</p>
+  </header>
+
+  <section class="container grid" aria-label="全部漫画">
+    {
+      comics.map((comic, index) => (
+        <a class="comic" href={comicUrl(comic.data.issue)} data-tilt="8" data-reveal style={`--i: ${index % 4}`}>
+          <div class="cover">
+            <img src={comic.data.images[0]} alt="" width="400" height="500" loading={index < 4 ? 'eager' : 'lazy'} decoding="async" />
+            {comic.data.images.length > 1 && <span class="pages">{comic.data.images.length} 页</span>}
+          </div>
+          <h2>{comic.data.title.replace(/^第(\d+)期$/, '第 $1 期')}</h2>
+          <p>{comic.data.cast}</p>
+        </a>
+      ))
+    }
+  </section>
+</SiteLayout>
+
+<style>
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 28px 14px;
+  }
+
+  .cover {
+    position: relative;
+    aspect-ratio: 4 / 5;
+    border-radius: 14px;
+    overflow: hidden;
+    background: var(--card);
+    box-shadow: var(--shadow-sm);
+    transform: perspective(700px) rotateX(var(--rx, 0)) rotateY(var(--ry, 0));
+    transition:
+      transform 0.5s var(--ease-out),
+      box-shadow 0.3s;
+  }
+
+  .comic:global(.is-tilting) .cover {
+    transition: transform 0.1s linear;
+  }
+
+  .comic:hover .cover {
+    box-shadow: var(--shadow);
+  }
+
+  .comic:active .cover {
+    transform: scale(0.98);
+  }
+
+  .cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top;
+  }
+
+  .pages {
+    position: absolute;
+    right: 8px;
+    bottom: 8px;
+    padding: 2px 9px;
+    border-radius: 999px;
+    background: rgb(255 253 249 / 0.92);
+    font-size: 13px;
+    color: var(--text-soft);
+  }
+
+  h2 {
+    margin-top: 10px;
+    font-size: 19px;
+  }
+
+  p {
+    font-size: 14px;
+    color: var(--text-soft);
+  }
+
+  @media (min-width: 640px) {
+    .grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 36px 20px;
+    }
+  }
+
+  @media (min-width: 960px) {
+    .grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 44px 28px;
+    }
+  }
+</style>

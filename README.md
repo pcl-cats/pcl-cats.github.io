@@ -1,27 +1,58 @@
-# PCL 猫猫图鉴
+# PCL 猫猫
 
-基于园区猫咪档案与照护日记制作的静态网站。桌面与手机都有独立适配的布局；内容由 Markdown 文件维护，网站构建时生成页面。
+PCL 园区流浪猫的档案和照护日记：<https://pcl-cats.github.io>
+
+网站由园区里照顾猫猫的学生和老师维护。每只猫一份档案，每天的照护写成日记，重要的日子标成大事记。
 
 ## 本地预览
 
+需要 Node.js 22.12 或更新版本。
+
 ```bash
 npm install
-npm run dev
+npm run dev          # 打开终端里显示的地址，改动会自动刷新
 ```
 
-访问终端显示的本地地址。发布前可运行：
+发布前检查：
 
 ```bash
-npm run check:content
-npm run build
+npm run check:content   # 检查档案、日记里的图片路径和猫猫 id
+npm run build           # 生成静态网站到 dist/
 ```
 
-## 更新内容
+推送到 `main` 后，GitHub Actions 会自动构建并发布到 GitHub Pages。
 
-猫咪档案、日记、大事记标记、漫画和图片的维护方式见 [content/README.md](content/README.md)。大事记与日记共用正文，在日记文件里设置 `milestone: true` 即可。
+## 目录
 
-原始 Word 文件未纳入公开仓库。网站只使用已筛选、压缩过的图片。
+```
+content/            网站内容（Markdown），日常更新只改这里
+  cats/             每只猫一个文件
+  diary/            每天一篇，YYYY-MM-DD.md
+  comics/           每期漫画一个文件
+  about.md          关于我们
+  guide.md          和猫猫相处
+public/
+  images/           照片（已压缩成 WebP）
+  art/months/       12 张月份插画，首页按月份自动换
+  art/cats/         猫猫的卡通形象，<猫的 id>-1.webp … -6.webp
+src/
+  config.ts         站名、导航、外部链接
+  lib/content.ts    读取内容、排序、日期格式
+  components/       页头、页脚、卡片、贴纸等组件
+  pages/            各个页面
+  scripts/          页面上的小互动（摸猫、倾斜、出现动画）
+  styles/global.css 颜色、字体和通用样式
+```
 
-## 发布
+更新内容的方法和文字风格见 [content/README.md](content/README.md)。
 
-仓库名为 `pcl-cats.github.io`，推送到 `main` 后由 GitHub Actions 构建。首次发布需要在仓库 **Settings → Pages → Build and deployment → Source** 选择 **GitHub Actions**。
+## 设计
+
+- 颜色取自 logo 的藏青和暖金，底色是奶油纸色。颜色都定义在 `src/styles/global.css` 开头。
+- 标题用 [霞鹜文楷](https://github.com/lxgw/LxgwWenKai)（SIL OFL 1.1），按需分片加载；正文用系统字体。
+- 插画来自 PCL-Cats 的文创和台历，背景已去掉。给一只猫加卡通形象，只要把图片按 `public/art/cats/<id>-1.webp` 的格式放进去，档案页会自动用上。
+- 所有动画都会照顾系统的“减少动态效果”设置。
+
+## 内容和图片
+
+猫猫照片、插画和漫画归 PCL-Cats 所有。原始 Word 文档和照护群里的资料不放进仓库。

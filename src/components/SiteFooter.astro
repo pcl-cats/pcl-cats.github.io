@@ -1,0 +1,130 @@
+---
+import { nav, site } from '../config';
+import { lastUpdated, shortDate } from '../lib/content';
+
+const updated = await lastUpdated();
+
+// 坐在页脚边上的猫，点一下换一只。
+const loafs = [
+  '/art/cats/meimei-5.webp',
+  '/art/cats/xionger-3.webp',
+  '/art/cats/huahua-3.webp',
+  '/art/cats/yunyun-3.webp',
+  '/art/cats/shatangju-1.webp',
+  '/art/cats/natie-3.webp',
+  '/art/cats/erbao-6.webp',
+  '/art/cats/xiaolaba-3.webp',
+];
+---
+
+<footer class="footer">
+  <button class="loaf" type="button" aria-label="摸摸猫" data-pet data-meow data-poses={JSON.stringify(loafs)}>
+    <img src={loafs[0]} alt="" width="120" height="96" loading="lazy" />
+  </button>
+  <div class="container inner">
+    <div class="about">
+      <a class="brand" href="/">
+        <img src="/logo.webp" width="30" height="30" alt="" loading="lazy" />
+        {site.name}
+      </a>
+      <p>园区里的猫，和照顾它们的猫猫侠。</p>
+    </div>
+    <nav aria-label="页脚导航">
+      {nav.map((item) => <a href={item.href}>{item.label}</a>)}
+    </nav>
+    {updated && <p class="updated">最近更新于 {shortDate(updated)}</p>}
+  </div>
+</footer>
+
+<style>
+  .footer {
+    position: relative;
+    margin-top: calc(var(--section) + 40px);
+    padding: 44px 0 calc(32px + env(safe-area-inset-bottom));
+    background: var(--navy);
+    color: rgb(255 255 255 / 0.72);
+  }
+
+  .loaf {
+    position: absolute;
+    right: max(var(--gutter), calc(50% - 540px));
+    bottom: calc(100% - 14px);
+    width: 104px;
+    transform-origin: 50% 100%;
+  }
+
+  .loaf img {
+    width: 100%;
+    height: auto;
+    filter: drop-shadow(0 4px 6px rgb(16 42 78 / 0.18));
+  }
+
+  .inner {
+    display: grid;
+    gap: 20px;
+  }
+
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-hand);
+    font-size: 20px;
+    color: #fff;
+  }
+
+  .brand img {
+    padding: 3px;
+    border-radius: 9px;
+    background: var(--paper);
+  }
+
+  .about p {
+    margin-top: 8px;
+    font-size: 15px;
+  }
+
+  nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 22px;
+    font-family: var(--font-hand);
+    font-size: 17px;
+  }
+
+  nav a {
+    color: #fff;
+    padding: 4px 0;
+  }
+
+  nav a:hover {
+    color: var(--gold);
+  }
+
+  .updated {
+    font-size: 14px;
+    color: rgb(255 255 255 / 0.55);
+  }
+
+  @media (min-width: 768px) {
+    .footer {
+      padding-top: 56px;
+    }
+
+    .inner {
+      grid-template-columns: 1fr auto;
+      align-items: end;
+      row-gap: 28px;
+    }
+
+    .updated {
+      grid-column: 1 / -1;
+      padding-top: 20px;
+      border-top: 1px solid rgb(255 255 255 / 0.12);
+    }
+
+    .loaf {
+      width: 124px;
+    }
+  }
+</style>

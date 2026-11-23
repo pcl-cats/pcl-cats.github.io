@@ -1,0 +1,74 @@
+---
+import type { Cat } from '../lib/content';
+import { catUrl } from '../lib/content';
+
+interface Props {
+  cat: Cat;
+  /** 名字上方的小字，比如“妈妈”“儿子” */
+  label?: string;
+  size?: number;
+  transition?: boolean;
+}
+
+const { cat, label, size = 72, transition = true } = Astro.props;
+---
+
+<a class="cat-avatar" href={catUrl(cat.id)} style={`--size: ${size}px`}>
+  <img
+    class="avatar"
+    src={cat.data.photo}
+    alt=""
+    width={size}
+    height={size}
+    loading="lazy"
+    decoding="async"
+    style={transition ? `view-transition-name: cat-${cat.id}` : undefined}
+  />
+  <span class="name">{cat.data.name}</span>
+  {label && <span class="label">{label}</span>}
+</a>
+
+<style>
+  .cat-avatar {
+    display: grid;
+    justify-items: center;
+    gap: 2px;
+    width: calc(var(--size) + 16px);
+    text-align: center;
+  }
+
+  img {
+    width: var(--size);
+    height: var(--size);
+    margin-bottom: 6px;
+    box-shadow:
+      0 0 0 3px var(--card),
+      var(--shadow-sm);
+    transition: transform 0.35s var(--ease-out);
+  }
+
+  .cat-avatar:hover img {
+    transform: translateY(-3px) rotate(-3deg);
+  }
+
+  .cat-avatar:active img {
+    transform: scale(0.95);
+  }
+
+  .name {
+    font-family: var(--font-hand);
+    font-size: 16px;
+    line-height: 1.3;
+    color: var(--heading);
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .label {
+    font-size: 13px;
+    line-height: 1.3;
+    color: var(--text-soft);
+  }
+</style>

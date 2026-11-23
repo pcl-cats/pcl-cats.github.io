@@ -9,6 +9,7 @@
   },
   "type": "module",
   "dependencies": {
-    "astro": "^7.3.7"
+    "astro": "^7.3.7",
+    "lxgw-wenkai-screen-webfont": "^1.7.0"
   }
 }

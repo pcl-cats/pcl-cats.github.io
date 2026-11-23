@@ -1,0 +1,122 @@
+---
+import { nav, site } from '../config';
+
+const path = Astro.url.pathname;
+---
+
+<header class="header" data-header>
+  <div class="container inner">
+    <a class="brand" href="/" aria-label={`${site.name}首页`}>
+      <img src="/logo.webp" width="34" height="34" alt="" />
+      <span>{site.name}</span>
+    </a>
+    <nav aria-label="主导航">
+      {
+        nav.map((item) => (
+          <a href={item.href} aria-current={path.startsWith(item.href) ? 'page' : undefined}>
+            {item.label}
+          </a>
+        ))
+      }
+    </nav>
+  </div>
+</header>
+
+<style>
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgb(251 246 238 / 0.88);
+    backdrop-filter: saturate(1.4) blur(14px);
+    -webkit-backdrop-filter: saturate(1.4) blur(14px);
+    box-shadow: 0 1px 0 transparent;
+    transition: box-shadow 0.3s;
+    view-transition-name: site-header;
+  }
+
+  .header:global(.is-scrolled) {
+    box-shadow: 0 1px 0 var(--line);
+  }
+
+  .inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    height: 60px;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: none;
+    font-family: var(--font-hand);
+    font-size: 19px;
+    color: var(--heading);
+  }
+
+  .brand img {
+    width: 32px;
+    height: 32px;
+  }
+
+  nav {
+    display: flex;
+    gap: 2px;
+  }
+
+  nav a {
+    position: relative;
+    white-space: nowrap;
+    padding: 6px 9px;
+    border-radius: 999px;
+    font-family: var(--font-hand);
+    font-size: 17px;
+    color: var(--text-soft);
+    transition:
+      color 0.2s,
+      background 0.2s;
+  }
+
+  nav a:hover {
+    color: var(--heading);
+  }
+
+  nav a[aria-current='page'] {
+    color: var(--heading);
+    background: var(--paper-deep);
+  }
+
+  @media (max-width: 374px) {
+    .brand span {
+      display: none;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .inner {
+      height: 72px;
+    }
+
+    .brand {
+      font-size: 21px;
+      gap: 10px;
+    }
+
+    .brand img {
+      width: 38px;
+      height: 38px;
+    }
+
+    nav {
+      gap: 6px;
+    }
+
+    nav a {
+      padding: 6px 16px;
+      font-size: 18px;
+    }
+  }
+</style>

@@ -1,0 +1,148 @@
+---
+// 首页的月份贴纸：12 张插画对应 12 个月，每月自动换。
+import { currentMonth, monthName } from '../lib/content';
+
+const month = currentMonth();
+const src = (m: number) => `/art/months/${String(m).padStart(2, '0')}.webp`;
+---
+
+<figure class="sticker" data-tilt="14" data-month={month}>
+  <div class="stage">
+    <div class="disc" aria-hidden="true"></div>
+    <button class="cat" type="button" aria-label="摸摸猫" data-pet data-meow>
+      <span class="bob"><img src={src(month)} alt="" width="640" height="640" fetchpriority="high" /></span>
+    </button>
+    <div class="shadow" aria-hidden="true"></div>
+  </div>
+  <figcaption>{monthName(month)}</figcaption>
+</figure>
+
+<script is:inline>
+  // 页面是在构建时生成的，跨月后还没重新构建时，在浏览器里换成当月的贴纸。
+  (() => {
+    const fig = document.currentScript?.previousElementSibling;
+    if (!fig) return;
+    const now = Number(new Intl.DateTimeFormat('en-US', { timeZone: 'Asia/Shanghai', month: 'numeric' }).format(new Date()));
+    if (now === Number(fig.dataset.month)) return;
+    const names = ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'];
+    fig.querySelector('img').src = `/art/months/${String(now).padStart(2, '0')}.webp`;
+    fig.querySelector('figcaption').textContent = names[now - 1];
+    fig.dataset.month = String(now);
+  })();
+</script>
+
+<style>
+  .sticker {
+    margin: 0;
+    display: grid;
+    justify-items: center;
+    gap: 6px;
+  }
+
+  .stage {
+    position: relative;
+    width: min(100%, 420px);
+    aspect-ratio: 1;
+    display: grid;
+    place-items: center;
+    transform-style: preserve-3d;
+    transform: perspective(900px) rotateX(var(--rx, 0)) rotateY(var(--ry, 0));
+    transition: transform 0.8s var(--ease-out);
+  }
+
+  .sticker:global(.is-tilting) .stage {
+    transition: transform 0.12s linear;
+  }
+
+  .disc {
+    position: absolute;
+    inset: 9%;
+    border-radius: 50%;
+    background:
+      radial-gradient(circle at var(--gx, 38%) var(--gy, 32%), #fffaf0 0%, transparent 55%),
+      var(--gold-soft);
+    transform: translateZ(-30px);
+  }
+
+  .disc::after {
+    content: '';
+    position: absolute;
+    inset: 12px;
+    border-radius: 50%;
+    border: 2px dashed rgb(201 164 100 / 0.5);
+  }
+
+  .cat {
+    position: relative;
+    width: 86%;
+    transform: translateZ(50px);
+  }
+
+  .bob {
+    display: block;
+    animation: bob 5s ease-in-out infinite;
+  }
+
+  .bob img {
+    width: 100%;
+    height: auto;
+    filter: drop-shadow(0 10px 14px rgb(74 52 28 / 0.14));
+  }
+
+  .shadow {
+    position: absolute;
+    left: 24%;
+    right: 24%;
+    bottom: 5%;
+    height: 7%;
+    border-radius: 50%;
+    background: radial-gradient(closest-side, rgb(74 52 28 / 0.16), transparent);
+    transform: translateZ(0);
+    animation: shadow 5s ease-in-out infinite;
+  }
+
+  figcaption {
+    font-family: var(--font-hand);
+    font-size: 17px;
+    letter-spacing: 0.2em;
+    color: var(--gold-ink);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  figcaption::before,
+  figcaption::after {
+    content: '';
+    width: 20px;
+    height: 1px;
+    background: var(--gold);
+  }
+
+  .cat :global(.pet-bubble) {
+    bottom: 88%;
+    font-size: 18px;
+  }
+
+  @keyframes bob {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-8px);
+    }
+  }
+
+  @keyframes shadow {
+    0%,
+    100% {
+      transform: scaleX(1);
+      opacity: 1;
+    }
+    50% {
+      transform: scaleX(0.9);
+      opacity: 0.7;
+    }
+  }
+</style>
