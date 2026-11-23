@@ -1,6 +1,6 @@
 ---
-import 'lxgw-wenkai-screen-webfont/lxgwwenkaigbscreen.css';
 import '../styles/global.css';
+import { fontUrl } from 'virtual:site-assets';
 import SiteHeader from '../components/SiteHeader.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 import { site } from '../config';
@@ -14,6 +14,8 @@ interface Props {
 const { title, description = site.description, image = '/og.jpg' } = Astro.props;
 const fullTitle = title ? `${title} · ${site.name}` : site.name;
 const canonical = new URL(Astro.url.pathname, Astro.site);
+// 标题字体：只含网站用到的字。没及时下载好就先用系统字体，不中途替换，避免页面跳动。
+const fontFace = `@font-face{font-family:'PCL WenKai';src:url(${fontUrl}) format('woff2');font-display:optional}`;
 ---
 
 <!doctype html>
@@ -24,6 +26,8 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <meta name="theme-color" content="#fbf6ee" />
     <meta name="description" content={description} />
     <title>{fullTitle}</title>
+    <link rel="preload" href={fontUrl} as="font" type="font/woff2" crossorigin />
+    <style is:inline set:html={fontFace}></style>
     <link rel="canonical" href={canonical} />
     <link rel="icon" href="/favicon.png" type="image/png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
@@ -44,5 +48,12 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <script>
       import '../scripts/interactions';
     </script>
+    {
+      import.meta.env.PROD && (
+        <script is:inline>
+          if ('serviceWorker' in navigator) addEventListener('load', () => navigator.serviceWorker.register('/sw.js'));
+        </script>
+      )
+    }
   </body>
 </html>

@@ -2,6 +2,8 @@
 import SiteLayout from '../../layouts/SiteLayout.astro';
 import Icon from '../../components/Icon.astro';
 import { comicSlug, comicUrl, getComics, type Comic } from '../../lib/content';
+import { images } from 'virtual:site-assets';
+import { placeholder, srcset, thumb } from '../../lib/images';
 
 export async function getStaticPaths() {
   const comics = await getComics();
@@ -23,7 +25,21 @@ const label = (item: Comic) => item.data.title.replace(/^第(\d+)期$/, '第 $1 
       <p>出场：{comic.data.cast}</p>
     </header>
     <div class="pages">
-      {comic.data.images.map((src, index) => <img src={src} alt={`${label(comic)}，第 ${index + 1} 页`} width="1080" height="1400" loading={index === 0 ? 'eager' : 'lazy'} decoding="async" />)}
+      {
+        comic.data.images.map((src, index) => (
+          <img
+            src={thumb(src, 960)}
+            srcset={srcset(src)}
+            sizes="(min-width: 800px) 720px, calc(100vw - 40px)"
+            alt={`${label(comic)}，第 ${index + 1} 页`}
+            width={images[src]?.width ?? 1080}
+            height={images[src]?.height ?? 1400}
+            loading={index === 0 ? 'eager' : 'lazy'}
+            decoding="async"
+            style={`background-color: ${placeholder(src)}`}
+          />
+        ))
+      }
     </div>
     <nav class="pager" aria-label="相邻的漫画">
       {prev ? <a href={comicUrl(prev.data.issue)}><Icon name="arrow-left" size={16} /> {label(prev)}</a> : <span />}

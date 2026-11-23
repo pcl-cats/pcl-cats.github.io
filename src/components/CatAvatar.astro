@@ -1,6 +1,7 @@
 ---
 import type { Cat } from '../lib/content';
 import { catUrl } from '../lib/content';
+import { placeholder, thumb } from '../lib/images';
 
 interface Props {
   cat: Cat;
@@ -16,13 +17,13 @@ const { cat, label, size = 72, transition = true } = Astro.props;
 <a class="cat-avatar" href={catUrl(cat.id)} style={`--size: ${size}px`}>
   <img
     class="avatar"
-    src={cat.data.photo}
+    src={thumb(cat.data.photo, 200)}
     alt=""
     width={size}
     height={size}
     loading="lazy"
     decoding="async"
-    style={transition ? `view-transition-name: cat-${cat.id}` : undefined}
+    style={`background-color: ${placeholder(cat.data.photo)}${transition ? `; view-transition-name: cat-${cat.id}` : ''}`}
   />
   <span class="name">{cat.data.name}</span>
   {label && <span class="label">{label}</span>}

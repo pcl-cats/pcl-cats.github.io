@@ -14,3 +14,7 @@ dist/
 
 # 系统文件
 .DS_Store
+
+# 构建时生成的字体和缩略图
+public/fonts/
+public/thumbs/

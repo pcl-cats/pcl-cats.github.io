@@ -1,6 +1,7 @@
 ---
 import SiteLayout from '../../layouts/SiteLayout.astro';
 import { comicUrl, getComics } from '../../lib/content';
+import { placeholder, thumb } from '../../lib/images';
 
 const comics = (await getComics()).reverse();
 ---
@@ -16,7 +17,15 @@ const comics = (await getComics()).reverse();
       comics.map((comic, index) => (
         <a class="comic" href={comicUrl(comic.data.issue)} data-tilt="8" data-reveal style={`--i: ${index % 4}`}>
           <div class="cover">
-            <img src={comic.data.images[0]} alt="" width="400" height="500" loading={index < 4 ? 'eager' : 'lazy'} decoding="async" />
+            <img
+              src={thumb(comic.data.images[0], 400)}
+              alt=""
+              width="400"
+              height="500"
+              loading={index < 4 ? 'eager' : 'lazy'}
+              decoding="async"
+              style={`background-color: ${placeholder(comic.data.images[0])}`}
+            />
             {comic.data.images.length > 1 && <span class="pages">{comic.data.images.length} 页</span>}
           </div>
           <h2>{comic.data.title.replace(/^第(\d+)期$/, '第 $1 期')}</h2>

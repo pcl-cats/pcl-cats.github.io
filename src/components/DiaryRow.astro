@@ -2,6 +2,7 @@
 import Icon from './Icon.astro';
 import type { Diary } from '../lib/content';
 import { dayOfMonth, diaryUrl, excerpt, weekday } from '../lib/content';
+import { placeholder, thumb } from '../lib/images';
 
 interface Props {
   entry: Diary;
@@ -27,7 +28,11 @@ const summary = excerpt(entry.body, 60);
     </h3>
     {summary && summary !== title && <p>{summary}</p>}
   </div>
-  {cover && <img class="thumb" src={cover} alt="" width="160" height="160" loading="lazy" decoding="async" />}
+  {
+    cover && (
+      <img class="thumb" src={thumb(cover, 200)} alt="" width="160" height="160" loading="lazy" decoding="async" style={`background-color: ${placeholder(cover)}`} />
+    )
+  }
 </a>
 
 <style>
